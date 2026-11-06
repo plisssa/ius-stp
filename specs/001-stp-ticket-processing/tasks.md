@@ -221,7 +221,7 @@ description: "Task list for feature 001-stp-ticket-processing"
 **Purpose**: доработки, затрагивающие несколько историй
 
 - [ ] T082 [P] Add Prometheus metrics (число заявок, доля в SLA, задержка уведомлений) and OpenTelemetry tracing in src/stp/core/observability.py
-- [ ] T083 [P] Document backup configuration (архивирование WAL, восстановление на момент времени; RPO — по решению G2) in docs/ops/backup.md
+- [ ] T083 [P] Document backup configuration (ежедневная полная копия, архивирование WAL не реже раза в час, восстановление на момент времени; RPO ≤ 1 ч, RTO ≤ 2 ч) in docs/ops/backup.md
 - [ ] T084 Security hardening in src/stp/core/security.py: тайм-аут сессий, ограничение попыток входа, параметры argon2id
 - [ ] T085 [P] Update docs/05-traceability.md with actual code files per component after implementation
 - [ ] T086 Run quickstart.md scenarios Q1–Q16 and record results in specs/001-stp-ticket-processing/checklists/quickstart-results.md

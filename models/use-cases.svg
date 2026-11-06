@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1560" height="1310" viewBox="0 0 1560 1310" font-family="Arial, Helvetica, sans-serif">
+<defs><marker id="open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" orient="auto"><path d="M1,1 L11,6 L1,11" fill="none" stroke="#000" stroke-width="1.4"/></marker></defs>
+<rect width="1560" height="1310" fill="#fff"/>
+<rect x="250" y="150" width="1020" height="1000" fill="none" stroke="#000" stroke-width="2"/>
+<text x="268" y="180" font-size="18" font-weight="bold">ИУС СТП</text>
+<line x1="132.0" y1="440.0" x2="370.9" y2="282.4" stroke="#000" stroke-width="1.3"/>
+<line x1="132.0" y1="440.0" x2="337.8" y2="372.1" stroke="#000" stroke-width="1.3"/>
+<line x1="132.0" y1="440.0" x2="290.0" y2="440.0" stroke="#000" stroke-width="1.3"/>
+<line x1="132.0" y1="440.0" x2="337.8" y2="507.9" stroke="#000" stroke-width="1.3"/>
+<line x1="132.0" y1="440.0" x2="370.9" y2="597.6" stroke="#000" stroke-width="1.3"/>
+<line x1="1418.0" y1="490.0" x2="1143.7" y2="283.0" stroke="#000" stroke-width="1.3"/>
+<line x1="1418.0" y1="490.0" x2="1166.1" y2="375.1" stroke="#000" stroke-width="1.3"/>
+<line x1="1418.0" y1="490.0" x2="1212.3" y2="457.7" stroke="#000" stroke-width="1.3"/>
+<line x1="1418.0" y1="490.0" x2="1215.1" y2="518.7" stroke="#000" stroke-width="1.3"/>
+<line x1="1418.0" y1="490.0" x2="1167.8" y2="600.1" stroke="#000" stroke-width="1.3"/>
+<line x1="1418.0" y1="490.0" x2="1144.5" y2="692.1" stroke="#000" stroke-width="1.3"/>
+<line x1="1418.0" y1="868.0" x2="1213.4" y2="837.1" stroke="#000" stroke-width="1.3"/>
+<line x1="1418.0" y1="868.0" x2="1214.0" y2="898.2" stroke="#000" stroke-width="1.3"/>
+<line x1="1418.0" y1="1055.0" x2="1215.1" y2="1026.3" stroke="#000" stroke-width="1.3"/>
+<line x1="1418.0" y1="1055.0" x2="1215.1" y2="1083.7" stroke="#000" stroke-width="1.3"/>
+<line x1="132.0" y1="725.0" x2="630.0" y2="725.0" stroke="#000" stroke-width="1.3"/>
+<line x1="760.0" y1="118.0" x2="760.0" y2="215.0" stroke="#000" stroke-width="1.3"/>
+<line x1="640.0" y1="1180.0" x2="744.3" y2="949.7" stroke="#000" stroke-width="1.3"/>
+<line x1="880.0" y1="1180.0" x2="775.7" y2="949.7" stroke="#000" stroke-width="1.3"/>
+<line x1="630.0" y1="250.0" x2="550.0" y2="250.0" stroke="#000" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<text x="590.0" y="242.0" font-size="13" text-anchor="middle">«extend»</text>
+<line x1="890.0" y1="345.0" x2="970.0" y2="345.0" stroke="#000" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<text x="930.0" y="337.0" font-size="13" text-anchor="middle">«extend»</text>
+<line x1="760.0" y1="760.0" x2="760.0" y2="880.0" stroke="#000" stroke-width="1.3" stroke-dasharray="7 5" marker-end="url(#open)"/>
+<text x="770.0" y="824.0" font-size="13">«include»</text>
+<ellipse cx="420" cy="250" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="420" y="247.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-01</text>
+<text x="420" y="263.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Создать заявку</text>
+<ellipse cx="420" cy="345" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="420" y="334.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-02</text>
+<text x="420" y="350.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Просмотреть заявки</text>
+<text x="420" y="366.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">своей организации</text>
+<ellipse cx="420" cy="440" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="420" y="437.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-03</text>
+<text x="420" y="453.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Ответить в заявке</text>
+<ellipse cx="420" cy="535" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="420" y="524.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-04</text>
+<text x="420" y="540.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Оценить решение</text>
+<text x="420" y="556.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">(помогло / не помогло)</text>
+<ellipse cx="420" cy="630" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="420" y="619.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-05</text>
+<text x="420" y="635.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Возобновить заявку</text>
+<text x="420" y="651.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">(в течение 2 недель)</text>
+<ellipse cx="760" cy="250" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="760" y="239.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-19</text>
+<text x="760" y="255.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Подготовить предложение</text>
+<text x="760" y="271.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">ИИ-ассистента</text>
+<ellipse cx="760" cy="345" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="760" y="334.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-10</text>
+<text x="760" y="350.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Провести удалённую</text>
+<text x="760" y="366.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">диагностику</text>
+<ellipse cx="760" cy="725" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="760" y="714.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-17</text>
+<text x="760" y="730.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Контролировать SLA</text>
+<text x="760" y="746.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">первого ответа</text>
+<ellipse cx="760" cy="915" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="760" y="904.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-18</text>
+<text x="760" y="920.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Отправить уведомление</text>
+<text x="760" y="936.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">(почта, Slack)</text>
+<ellipse cx="1100" cy="250" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="1100" y="247.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-06</text>
+<text x="1100" y="263.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Взять заявку в работу</text>
+<ellipse cx="1100" cy="345" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="1100" y="334.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-07</text>
+<text x="1100" y="350.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Ответить или</text>
+<text x="1100" y="366.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">запросить информацию</text>
+<ellipse cx="1100" cy="440" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="1100" y="429.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-08</text>
+<text x="1100" y="445.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Проверить приоритет</text>
+<text x="1100" y="461.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">и инсталляцию</text>
+<ellipse cx="1100" cy="535" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="1100" y="532.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-09</text>
+<text x="1100" y="548.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Эскалировать заявку</text>
+<ellipse cx="1100" cy="630" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="1100" y="627.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-11</text>
+<text x="1100" y="643.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Закрыть заявку</text>
+<ellipse cx="1100" cy="725" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="1100" y="714.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-12</text>
+<text x="1100" y="730.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Рассмотреть предложение</text>
+<text x="1100" y="746.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">ассистента</text>
+<ellipse cx="1100" cy="820" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="1100" y="817.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-13</text>
+<text x="1100" y="833.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Назначить исполнителя</text>
+<ellipse cx="1100" cy="915" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="1100" y="912.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-14</text>
+<text x="1100" y="928.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Сформировать отчёты</text>
+<ellipse cx="1100" cy="1010" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="1100" y="999.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-15</text>
+<text x="1100" y="1015.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Настроить SLA</text>
+<text x="1100" y="1031.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">организации</text>
+<ellipse cx="1100" cy="1100" rx="130.0" ry="35.0" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<text x="1100" y="1089.0" font-size="12" font-weight="normal" fill="#444" text-anchor="middle">UC-16</text>
+<text x="1100" y="1105.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">Управлять</text>
+<text x="1100" y="1121.0" font-size="14" font-weight="normal" fill="#000" text-anchor="middle">ИИ-ассистентом</text>
+<circle cx="110" cy="410" r="10" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<line x1="110" y1="420" x2="110" y2="452" stroke="#000" stroke-width="1.5"/>
+<line x1="92" y1="432" x2="128" y2="432" stroke="#000" stroke-width="1.5"/>
+<line x1="110" y1="452" x2="96" y2="476" stroke="#000" stroke-width="1.5"/>
+<line x1="110" y1="452" x2="124" y2="476" stroke="#000" stroke-width="1.5"/>
+<text x="110" y="496" font-size="14" text-anchor="middle">Клиент</text>
+<circle cx="110" cy="695" r="10" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<line x1="110" y1="705" x2="110" y2="737" stroke="#000" stroke-width="1.5"/>
+<line x1="92" y1="717" x2="128" y2="717" stroke="#000" stroke-width="1.5"/>
+<line x1="110" y1="737" x2="96" y2="761" stroke="#000" stroke-width="1.5"/>
+<line x1="110" y1="737" x2="124" y2="761" stroke="#000" stroke-width="1.5"/>
+<text x="110" y="781" font-size="14" text-anchor="middle">Время (таймер)</text>
+<circle cx="1440" cy="460" r="10" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<line x1="1440" y1="470" x2="1440" y2="502" stroke="#000" stroke-width="1.5"/>
+<line x1="1422" y1="482" x2="1458" y2="482" stroke="#000" stroke-width="1.5"/>
+<line x1="1440" y1="502" x2="1426" y2="526" stroke="#000" stroke-width="1.5"/>
+<line x1="1440" y1="502" x2="1454" y2="526" stroke="#000" stroke-width="1.5"/>
+<text x="1440" y="546" font-size="14" text-anchor="middle">Инженер ТП</text>
+<circle cx="1440" cy="838" r="10" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<line x1="1440" y1="848" x2="1440" y2="880" stroke="#000" stroke-width="1.5"/>
+<line x1="1422" y1="860" x2="1458" y2="860" stroke="#000" stroke-width="1.5"/>
+<line x1="1440" y1="880" x2="1426" y2="904" stroke="#000" stroke-width="1.5"/>
+<line x1="1440" y1="880" x2="1454" y2="904" stroke="#000" stroke-width="1.5"/>
+<text x="1440" y="924" font-size="14" text-anchor="middle">Руководитель ТП</text>
+<circle cx="1440" cy="1025" r="10" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<line x1="1440" y1="1035" x2="1440" y2="1067" stroke="#000" stroke-width="1.5"/>
+<line x1="1422" y1="1047" x2="1458" y2="1047" stroke="#000" stroke-width="1.5"/>
+<line x1="1440" y1="1067" x2="1426" y2="1091" stroke="#000" stroke-width="1.5"/>
+<line x1="1440" y1="1067" x2="1454" y2="1091" stroke="#000" stroke-width="1.5"/>
+<text x="1440" y="1111" font-size="14" text-anchor="middle">Администратор</text>
+<circle cx="760" cy="40" r="10" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<line x1="760" y1="50" x2="760" y2="82" stroke="#000" stroke-width="1.5"/>
+<line x1="742" y1="62" x2="778" y2="62" stroke="#000" stroke-width="1.5"/>
+<line x1="760" y1="82" x2="746" y2="106" stroke="#000" stroke-width="1.5"/>
+<line x1="760" y1="82" x2="774" y2="106" stroke="#000" stroke-width="1.5"/>
+<text x="790" y="56" font-size="14">«система»</text>
+<text x="790" y="74" font-size="14">ИИ-ассистент</text>
+<circle cx="640" cy="1195" r="10" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<line x1="640" y1="1205" x2="640" y2="1237" stroke="#000" stroke-width="1.5"/>
+<line x1="622" y1="1217" x2="658" y2="1217" stroke="#000" stroke-width="1.5"/>
+<line x1="640" y1="1237" x2="626" y2="1261" stroke="#000" stroke-width="1.5"/>
+<line x1="640" y1="1237" x2="654" y2="1261" stroke="#000" stroke-width="1.5"/>
+<text x="640" y="1281" font-size="14" text-anchor="middle">«система»</text>
+<text x="640" y="1298" font-size="14" text-anchor="middle">Корпоративная почта</text>
+<circle cx="880" cy="1195" r="10" fill="#fff" stroke="#000" stroke-width="1.5"/>
+<line x1="880" y1="1205" x2="880" y2="1237" stroke="#000" stroke-width="1.5"/>
+<line x1="862" y1="1217" x2="898" y2="1217" stroke="#000" stroke-width="1.5"/>
+<line x1="880" y1="1237" x2="866" y2="1261" stroke="#000" stroke-width="1.5"/>
+<line x1="880" y1="1237" x2="894" y2="1261" stroke="#000" stroke-width="1.5"/>
+<text x="880" y="1281" font-size="14" text-anchor="middle">«система»</text>
+<text x="880" y="1298" font-size="14" text-anchor="middle">Slack</text>
+<path d="M290,880 L540,880 L560,900 L560,965 L290,965 Z" fill="#fff" stroke="#000" stroke-width="1.2"/>
+<path d="M540,880 L540,900 L560,900" fill="none" stroke="#000" stroke-width="1.2"/>
+<text x="300" y="903" font-size="13">UC-18 включается (include) во все</text>
+<text x="300" y="921" font-size="13">варианты, которые создают заявку или</text>
+<text x="300" y="939" font-size="13">меняют её статус (BR-12)</text>
+<line x1="560" y1="925" x2="632.2" y2="921.4" stroke="#000" stroke-width="1" stroke-dasharray="4 4"/>
+</svg>
