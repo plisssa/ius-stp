@@ -1,0 +1,779 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_STP" targetNamespace="http://bpmn.io/schema/bpmn">
+  <bpmn:collaboration id="Collaboration_STP">
+    <bpmn:participant id="Participant_STP" name="Обработка обращения в СТП (TO-BE, вариант 12)" processRef="Process_STP" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_STP" name="Обработка обращения в СТП" isExecutable="false">
+    <bpmn:documentation>Модель автоматизируемого процесса по кейсу 12. Правила BR-xx и допущения ASM-xx — docs/01-process-analysis.md.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_STP">
+      <bpmn:lane id="Lane_Client" name="Клиент (сотрудник организации-клиента)">
+        <bpmn:flowNodeRef>SE_Need</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Submit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_ClientReview</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>BT_3days</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>GW_Solved</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_System" name="ИУС СТП (детерминированное ядро)">
+        <bpmn:flowNodeRef>T_Register</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>GW_Split</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_StartSLA</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EBG_SLA1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ICE_Warn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Warn</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EBG_SLA2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ICE_Breach</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Breach</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EE_Breach</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ICE_FirstResp1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EE_SLAOk1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ICE_FirstResp2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EE_SLAOk2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Notify</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_RecordResponse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ITE_FirstResp</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Close</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EBG_Reopen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ICE_Reopen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>ICE_2weeks</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>EE_Closed</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_AI" name="ИИ-ассистент (TO-BE, только предлагает)">
+        <bpmn:flowNodeRef>T_AIProposal</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Engineer" name="Инженер ТП">
+        <bpmn:flowNodeRef>GW_Free</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Take</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>GW_Merge1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>GW_MergeLoop</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Check</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>GW_Competent</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Escalate</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>GW_Merge2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>GW_Info</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>GW_Extended</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_RemoteDiag</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_RequestInfo</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_Answer</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>GW_Merge3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>GW_CloseNoReply</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>T_CloseDecision</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Head" name="Руководитель подразделения ТП">
+        <bpmn:flowNodeRef>T_HeadAssign</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="SE_Need" name="Возникла потребность в помощи">
+      <bpmn:outgoing>F01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="T_Submit" name="Заполнить заявку на портале и нажать «Send»">
+      <bpmn:documentation>BR-01. Клиент указывает тему, описание, тип, приоритет, инсталляцию.</bpmn:documentation>
+      <bpmn:incoming>F01</bpmn:incoming>
+      <bpmn:outgoing>F02</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_ClientReview" name="Изучить ответ, дать информацию или обратную связь">
+      <bpmn:documentation>BR-21, BR-22. Клиент предоставляет запрошенную информацию или сообщает, помогло ли решение.</bpmn:documentation>
+      <bpmn:incoming>F39</bpmn:incoming>
+      <bpmn:incoming>F51</bpmn:incoming>
+      <bpmn:outgoing>F40</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="BT_3days" name="3 рабочих дня без ответа клиента" cancelActivity="true" attachedToRef="T_ClientReview">
+      <bpmn:documentation>BR-19. Отсчёт от последнего ответа инженера, рабочие дни по производственному календарю (ASM-07).</bpmn:documentation>
+      <bpmn:outgoing>F43</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TED_BT_3days" />
+    </bpmn:boundaryEvent>
+    <bpmn:exclusiveGateway id="GW_Solved" name="Вопрос решён?">
+      <bpmn:incoming>F40</bpmn:incoming>
+      <bpmn:outgoing>F41</bpmn:outgoing>
+      <bpmn:outgoing>F42</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="T_Register" name="Зарегистрировать заявку: ES-NNNN, Waiting for support">
+      <bpmn:documentation>BR-02, BR-03, BR-04. ID = «ES-» + 4 цифры; организация и автор; исполнитель Unassigned.</bpmn:documentation>
+      <bpmn:incoming>F02</bpmn:incoming>
+      <bpmn:outgoing>F03</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="GW_Split">
+      <bpmn:incoming>F03</bpmn:incoming>
+      <bpmn:outgoing>F04</bpmn:outgoing>
+      <bpmn:outgoing>F16</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="T_StartSLA" name="Рассчитать дедлайн первого ответа по SLA">
+      <bpmn:documentation>BR-07, BR-08. Дедлайн = регистрация + норматив SLA организации для приоритета (ASM-01).</bpmn:documentation>
+      <bpmn:incoming>F04</bpmn:incoming>
+      <bpmn:outgoing>F05</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:eventBasedGateway id="EBG_SLA1">
+      <bpmn:incoming>F05</bpmn:incoming>
+      <bpmn:outgoing>F06</bpmn:outgoing>
+      <bpmn:outgoing>F12</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="ICE_Warn" name="За 1 ч до дедлайна">
+      <bpmn:incoming>F06</bpmn:incoming>
+      <bpmn:outgoing>F07</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TED_ICE_Warn" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sendTask id="T_Warn" name="Предупредить инженеров по e-mail">
+      <bpmn:documentation>BR-11, ASM-02, ASM-10.</bpmn:documentation>
+      <bpmn:incoming>F07</bpmn:incoming>
+      <bpmn:outgoing>F08</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:eventBasedGateway id="EBG_SLA2">
+      <bpmn:incoming>F08</bpmn:incoming>
+      <bpmn:outgoing>F09</bpmn:outgoing>
+      <bpmn:outgoing>F14</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="ICE_Breach" name="Дедлайн истёк">
+      <bpmn:incoming>F09</bpmn:incoming>
+      <bpmn:outgoing>F10</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TED_ICE_Breach" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sendTask id="T_Breach" name="Зафиксировать нарушение SLA, уведомить инженеров и руководителя">
+      <bpmn:documentation>BR-10.</bpmn:documentation>
+      <bpmn:incoming>F10</bpmn:incoming>
+      <bpmn:outgoing>F11</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:endEvent id="EE_Breach" name="SLA нарушен">
+      <bpmn:incoming>F11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:intermediateCatchEvent id="ICE_FirstResp1" name="Первый ответ">
+      <bpmn:incoming>F12</bpmn:incoming>
+      <bpmn:outgoing>F13</bpmn:outgoing>
+      <bpmn:signalEventDefinition id="SED_ICE_FirstResp1" signalRef="Signal_FirstResponse" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="EE_SLAOk1" name="SLA соблюдён">
+      <bpmn:incoming>F13</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:intermediateCatchEvent id="ICE_FirstResp2" name="Первый ответ">
+      <bpmn:incoming>F14</bpmn:incoming>
+      <bpmn:outgoing>F15</bpmn:outgoing>
+      <bpmn:signalEventDefinition id="SED_ICE_FirstResp2" signalRef="Signal_FirstResponse" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="EE_SLAOk2" name="SLA соблюдён">
+      <bpmn:incoming>F15</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sendTask id="T_Notify" name="Уведомить о новой заявке (e-mail, Slack)">
+      <bpmn:documentation>BR-12.</bpmn:documentation>
+      <bpmn:incoming>F16</bpmn:incoming>
+      <bpmn:outgoing>F17</bpmn:outgoing>
+    </bpmn:sendTask>
+    <bpmn:serviceTask id="T_RecordResponse" name="Зафиксировать ответ, перевести в Waiting for customer">
+      <bpmn:documentation>BR-05, BR-09, BR-16, BR-18. Первый ответ назначает исполнителя и отмечает соблюдение SLA.</bpmn:documentation>
+      <bpmn:incoming>F37</bpmn:incoming>
+      <bpmn:outgoing>F38</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateThrowEvent id="ITE_FirstResp" name="Первый ответ опубликован">
+      <bpmn:incoming>F38</bpmn:incoming>
+      <bpmn:outgoing>F39</bpmn:outgoing>
+      <bpmn:signalEventDefinition id="SED_ITE_FirstResp" signalRef="Signal_FirstResponse" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:serviceTask id="T_Close" name="Перевести в статус Closed, уведомить">
+      <bpmn:documentation>BR-22, ASM-04.</bpmn:documentation>
+      <bpmn:incoming>F44</bpmn:incoming>
+      <bpmn:outgoing>F45</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:eventBasedGateway id="EBG_Reopen">
+      <bpmn:incoming>F45</bpmn:incoming>
+      <bpmn:outgoing>F46</bpmn:outgoing>
+      <bpmn:outgoing>F48</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="ICE_Reopen" name="Клиент возобновил заявку">
+      <bpmn:documentation>BR-20.</bpmn:documentation>
+      <bpmn:incoming>F46</bpmn:incoming>
+      <bpmn:outgoing>F47</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MED_ICE_Reopen" messageRef="Message_Reopen" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="ICE_2weeks" name="Прошло 2 недели">
+      <bpmn:incoming>F48</bpmn:incoming>
+      <bpmn:outgoing>F49</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TED_ICE_2weeks"><bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P14D</bpmn:timeDuration></bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:endEvent id="EE_Closed" name="Заявка закрыта окончательно">
+      <bpmn:incoming>F49</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="T_AIProposal" name="Подготовить предложение: тип, приоритет, исполнитель, черновик">
+      <bpmn:documentation>TO-BE. ИИ-01…ИИ-12. Только предложение; при недоступности — процесс идёт без него (ИИ-08).</bpmn:documentation>
+      <bpmn:incoming>F17</bpmn:incoming>
+      <bpmn:outgoing>F18</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="GW_Free" name="Есть свободный инженер?">
+      <bpmn:incoming>F18</bpmn:incoming>
+      <bpmn:outgoing>F19</bpmn:outgoing>
+      <bpmn:outgoing>F20</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_Take" name="Взять заявку в работу">
+      <bpmn:documentation>BR-13.</bpmn:documentation>
+      <bpmn:incoming>F19</bpmn:incoming>
+      <bpmn:outgoing>F21</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="GW_Merge1">
+      <bpmn:incoming>F21</bpmn:incoming>
+      <bpmn:incoming>F22</bpmn:incoming>
+      <bpmn:incoming>F47</bpmn:incoming>
+      <bpmn:outgoing>F23</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="GW_MergeLoop">
+      <bpmn:incoming>F23</bpmn:incoming>
+      <bpmn:incoming>F27</bpmn:incoming>
+      <bpmn:incoming>F42</bpmn:incoming>
+      <bpmn:outgoing>F24</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_Check" name="Проверить приоритет и инсталляцию, рассмотреть проблему">
+      <bpmn:documentation>BR-14 и диагностика. Неточность инсталляции исправить; при несоответствии приоритета запросить обоснование у клиента; затем рассмотреть проблему (при возврате «не помогло» — повторная диагностика, BR-21).</bpmn:documentation>
+      <bpmn:incoming>F24</bpmn:incoming>
+      <bpmn:outgoing>F25</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="GW_Competent" name="Хватает компетенции?">
+      <bpmn:incoming>F25</bpmn:incoming>
+      <bpmn:outgoing>F26</bpmn:outgoing>
+      <bpmn:outgoing>F28</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_Escalate" name="Эскалировать на более опытного инженера">
+      <bpmn:documentation>BR-15, BR-06, ASM-12.</bpmn:documentation>
+      <bpmn:incoming>F26</bpmn:incoming>
+      <bpmn:outgoing>F27</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="GW_Merge2">
+      <bpmn:incoming>F28</bpmn:incoming>
+      <bpmn:incoming>F33</bpmn:incoming>
+      <bpmn:outgoing>F29</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="GW_Info" name="Хватает данных?">
+      <bpmn:documentation>Достаточно ли диагностической информации для решения (BR-16, BR-17).</bpmn:documentation>
+      <bpmn:incoming>F29</bpmn:incoming>
+      <bpmn:outgoing>F30</bpmn:outgoing>
+      <bpmn:outgoing>F31</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="GW_Extended" name="Расширенная поддержка?">
+      <bpmn:incoming>F31</bpmn:incoming>
+      <bpmn:outgoing>F32</bpmn:outgoing>
+      <bpmn:outgoing>F34</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_RemoteDiag" name="Собрать диагностику удалённо">
+      <bpmn:documentation>BR-17. Временную приостановку ПО согласовать с клиентом. ИИ-ассистенту доступ запрещён.</bpmn:documentation>
+      <bpmn:incoming>F32</bpmn:incoming>
+      <bpmn:outgoing>F33</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_RequestInfo" name="Запросить диагностическую информацию у клиента">
+      <bpmn:documentation>BR-16.</bpmn:documentation>
+      <bpmn:incoming>F34</bpmn:incoming>
+      <bpmn:outgoing>F35</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_Answer" name="Подготовить и опубликовать решение">
+      <bpmn:documentation>Инженер может использовать черновик ассистента только после утверждения (принцип P2).</bpmn:documentation>
+      <bpmn:incoming>F30</bpmn:incoming>
+      <bpmn:outgoing>F36</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="GW_Merge3">
+      <bpmn:incoming>F35</bpmn:incoming>
+      <bpmn:incoming>F36</bpmn:incoming>
+      <bpmn:outgoing>F37</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="GW_CloseNoReply" name="Закрыть по отсутствию ответа?">
+      <bpmn:documentation>BR-19: после 3 рабочих дней без ответа клиента появляется возможность закрыть заявку; решение принимает инженер.</bpmn:documentation>
+      <bpmn:incoming>F43</bpmn:incoming>
+      <bpmn:outgoing>F50</bpmn:outgoing>
+      <bpmn:outgoing>F51</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="T_CloseDecision" name="Закрыть заявку с указанием причины">
+      <bpmn:documentation>BR-19, BR-22, ASM-06. Причина: «решено» или «нет ответа клиента».</bpmn:documentation>
+      <bpmn:incoming>F41</bpmn:incoming>
+      <bpmn:incoming>F50</bpmn:incoming>
+      <bpmn:outgoing>F44</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:userTask id="T_HeadAssign" name="Пересмотреть приоритеты и назначить инженера">
+      <bpmn:documentation>BR-13. Учитываются занятость, компетентность, история работы с клиентом (и рекомендация ассистента).</bpmn:documentation>
+      <bpmn:incoming>F20</bpmn:incoming>
+      <bpmn:outgoing>F22</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="F01" sourceRef="SE_Need" targetRef="T_Submit" />
+    <bpmn:sequenceFlow id="F02" sourceRef="T_Submit" targetRef="T_Register" />
+    <bpmn:sequenceFlow id="F03" sourceRef="T_Register" targetRef="GW_Split" />
+    <bpmn:sequenceFlow id="F04" sourceRef="GW_Split" targetRef="T_StartSLA" />
+    <bpmn:sequenceFlow id="F05" sourceRef="T_StartSLA" targetRef="EBG_SLA1" />
+    <bpmn:sequenceFlow id="F06" sourceRef="EBG_SLA1" targetRef="ICE_Warn" />
+    <bpmn:sequenceFlow id="F07" sourceRef="ICE_Warn" targetRef="T_Warn" />
+    <bpmn:sequenceFlow id="F08" sourceRef="T_Warn" targetRef="EBG_SLA2" />
+    <bpmn:sequenceFlow id="F09" sourceRef="EBG_SLA2" targetRef="ICE_Breach" />
+    <bpmn:sequenceFlow id="F10" sourceRef="ICE_Breach" targetRef="T_Breach" />
+    <bpmn:sequenceFlow id="F11" sourceRef="T_Breach" targetRef="EE_Breach" />
+    <bpmn:sequenceFlow id="F12" sourceRef="EBG_SLA1" targetRef="ICE_FirstResp1" />
+    <bpmn:sequenceFlow id="F13" sourceRef="ICE_FirstResp1" targetRef="EE_SLAOk1" />
+    <bpmn:sequenceFlow id="F14" sourceRef="EBG_SLA2" targetRef="ICE_FirstResp2" />
+    <bpmn:sequenceFlow id="F15" sourceRef="ICE_FirstResp2" targetRef="EE_SLAOk2" />
+    <bpmn:sequenceFlow id="F16" sourceRef="GW_Split" targetRef="T_Notify" />
+    <bpmn:sequenceFlow id="F17" sourceRef="T_Notify" targetRef="T_AIProposal" />
+    <bpmn:sequenceFlow id="F18" sourceRef="T_AIProposal" targetRef="GW_Free" />
+    <bpmn:sequenceFlow id="F19" name="Да" sourceRef="GW_Free" targetRef="T_Take" />
+    <bpmn:sequenceFlow id="F20" name="Нет" sourceRef="GW_Free" targetRef="T_HeadAssign" />
+    <bpmn:sequenceFlow id="F21" sourceRef="T_Take" targetRef="GW_Merge1" />
+    <bpmn:sequenceFlow id="F22" sourceRef="T_HeadAssign" targetRef="GW_Merge1" />
+    <bpmn:sequenceFlow id="F23" sourceRef="GW_Merge1" targetRef="GW_MergeLoop" />
+    <bpmn:sequenceFlow id="F24" sourceRef="GW_MergeLoop" targetRef="T_Check" />
+    <bpmn:sequenceFlow id="F25" sourceRef="T_Check" targetRef="GW_Competent" />
+    <bpmn:sequenceFlow id="F26" name="Нет" sourceRef="GW_Competent" targetRef="T_Escalate" />
+    <bpmn:sequenceFlow id="F27" sourceRef="T_Escalate" targetRef="GW_MergeLoop" />
+    <bpmn:sequenceFlow id="F28" name="Да" sourceRef="GW_Competent" targetRef="GW_Merge2" />
+    <bpmn:sequenceFlow id="F29" sourceRef="GW_Merge2" targetRef="GW_Info" />
+    <bpmn:sequenceFlow id="F30" name="Да" sourceRef="GW_Info" targetRef="T_Answer" />
+    <bpmn:sequenceFlow id="F31" name="Нет" sourceRef="GW_Info" targetRef="GW_Extended" />
+    <bpmn:sequenceFlow id="F32" name="Да" sourceRef="GW_Extended" targetRef="T_RemoteDiag" />
+    <bpmn:sequenceFlow id="F33" sourceRef="T_RemoteDiag" targetRef="GW_Merge2" />
+    <bpmn:sequenceFlow id="F34" name="Нет" sourceRef="GW_Extended" targetRef="T_RequestInfo" />
+    <bpmn:sequenceFlow id="F35" sourceRef="T_RequestInfo" targetRef="GW_Merge3" />
+    <bpmn:sequenceFlow id="F36" sourceRef="T_Answer" targetRef="GW_Merge3" />
+    <bpmn:sequenceFlow id="F37" sourceRef="GW_Merge3" targetRef="T_RecordResponse" />
+    <bpmn:sequenceFlow id="F38" sourceRef="T_RecordResponse" targetRef="ITE_FirstResp" />
+    <bpmn:sequenceFlow id="F39" sourceRef="ITE_FirstResp" targetRef="T_ClientReview" />
+    <bpmn:sequenceFlow id="F40" sourceRef="T_ClientReview" targetRef="GW_Solved" />
+    <bpmn:sequenceFlow id="F41" name="Да" sourceRef="GW_Solved" targetRef="T_CloseDecision" />
+    <bpmn:sequenceFlow id="F42" name="Нет (нужна доп. работа)" sourceRef="GW_Solved" targetRef="GW_MergeLoop" />
+    <bpmn:sequenceFlow id="F43" sourceRef="BT_3days" targetRef="GW_CloseNoReply" />
+    <bpmn:sequenceFlow id="F50" name="Да" sourceRef="GW_CloseNoReply" targetRef="T_CloseDecision" />
+    <bpmn:sequenceFlow id="F51" name="Нет" sourceRef="GW_CloseNoReply" targetRef="T_ClientReview" />
+    <bpmn:sequenceFlow id="F44" sourceRef="T_CloseDecision" targetRef="T_Close" />
+    <bpmn:sequenceFlow id="F45" sourceRef="T_Close" targetRef="EBG_Reopen" />
+    <bpmn:sequenceFlow id="F46" sourceRef="EBG_Reopen" targetRef="ICE_Reopen" />
+    <bpmn:sequenceFlow id="F47" sourceRef="ICE_Reopen" targetRef="GW_Merge1" />
+    <bpmn:sequenceFlow id="F48" sourceRef="EBG_Reopen" targetRef="ICE_2weeks" />
+    <bpmn:sequenceFlow id="F49" sourceRef="ICE_2weeks" targetRef="EE_Closed" />
+    <bpmn:textAnnotation id="ANN_SLA"><bpmn:text>Дедлайн хранится в заявке; таймеры считаются от него и переживают перезапуск (НФТ-02). Ветка SLA не зависит от ИИ (P4).</bpmn:text></bpmn:textAnnotation>
+    <bpmn:association id="Assoc_ANN_SLA" associationDirection="None" sourceRef="T_StartSLA" targetRef="ANN_SLA" />
+    <bpmn:textAnnotation id="ANN_Notify"><bpmn:text>Уведомления (отдельное письмо + канал Slack) уходят также при каждом обновлении и смене статуса заявки (BR-12).</bpmn:text></bpmn:textAnnotation>
+    <bpmn:association id="Assoc_ANN_Notify" associationDirection="None" sourceRef="T_Notify" targetRef="ANN_Notify" />
+    <bpmn:textAnnotation id="ANN_AI"><bpmn:text>TO-BE. Уровень «черновик + human-gate»: ассистент только предлагает, решения принимают инженер и руководитель. Клиенту ничего не отправляется без утверждения (P2). Нет доступа к серверам клиентов (P5).</bpmn:text></bpmn:textAnnotation>
+    <bpmn:association id="Assoc_ANN_AI" associationDirection="None" sourceRef="T_AIProposal" targetRef="ANN_AI" />
+    <bpmn:textAnnotation id="ANN_First"><bpmn:text>Сигнал выдаётся только при первом ответе: он завершает ветку контроля SLA (BR-09, BR-16).</bpmn:text></bpmn:textAnnotation>
+    <bpmn:association id="Assoc_ANN_First" associationDirection="None" sourceRef="ITE_FirstResp" targetRef="ANN_First" />
+    <bpmn:textAnnotation id="ANN_Client"><bpmn:text>Ответ клиента обнуляет отсчёт 3 рабочих дней. После закрытия клиент может возобновить заявку в течение 2 недель (BR-20).</bpmn:text></bpmn:textAnnotation>
+    <bpmn:association id="Assoc_ANN_Client" associationDirection="None" sourceRef="BT_3days" targetRef="ANN_Client" />
+  </bpmn:process>
+  <bpmn:signal id="Signal_FirstResponse" name="Первый ответ опубликован" />
+  <bpmn:message id="Message_Reopen" name="Заявка возобновлена клиентом" />
+  <bpmndi:BPMNDiagram id="Diagram_STP">
+    <bpmndi:BPMNPlane id="Plane_STP" bpmnElement="Collaboration_STP">
+      <bpmndi:BPMNShape id="Participant_STP_di" bpmnElement="Participant_STP" isHorizontal="true"><dc:Bounds x="100" y="40" width="3280" height="1100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Client_di" bpmnElement="Lane_Client" isHorizontal="true"><dc:Bounds x="130" y="40" width="3250" height="200" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_System_di" bpmnElement="Lane_System" isHorizontal="true"><dc:Bounds x="130" y="240" width="3250" height="320" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_AI_di" bpmnElement="Lane_AI" isHorizontal="true"><dc:Bounds x="130" y="560" width="3250" height="140" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Engineer_di" bpmnElement="Lane_Engineer" isHorizontal="true"><dc:Bounds x="130" y="700" width="3250" height="300" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Head_di" bpmnElement="Lane_Head" isHorizontal="true"><dc:Bounds x="130" y="1000" width="3250" height="140" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="SE_Need_di" bpmnElement="SE_Need">
+        <dc:Bounds x="172" y="122" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="140" y="160" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_Submit_di" bpmnElement="T_Submit">
+        <dc:Bounds x="250" y="100" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_ClientReview_di" bpmnElement="T_ClientReview">
+        <dc:Bounds x="2540" y="100" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BT_3days_di" bpmnElement="BT_3days">
+        <dc:Bounds x="2622" y="162" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="2660" y="195" width="95" height="40" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_Solved_di" bpmnElement="GW_Solved" isMarkerVisible="true">
+        <dc:Bounds x="2735" y="115" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="2790" y="150" width="110" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_Register_di" bpmnElement="T_Register">
+        <dc:Bounds x="400" y="460" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_Split_di" bpmnElement="GW_Split">
+        <dc:Bounds x="565" y="475" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_StartSLA_di" bpmnElement="T_StartSLA">
+        <dc:Bounds x="660" y="260" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EBG_SLA1_di" bpmnElement="EBG_SLA1">
+        <dc:Bounds x="825" y="275" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ICE_Warn_di" bpmnElement="ICE_Warn">
+        <dc:Bounds x="932" y="282" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="900" y="320" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_Warn_di" bpmnElement="T_Warn">
+        <dc:Bounds x="1010" y="260" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EBG_SLA2_di" bpmnElement="EBG_SLA2">
+        <dc:Bounds x="1175" y="275" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ICE_Breach_di" bpmnElement="ICE_Breach">
+        <dc:Bounds x="1282" y="282" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1250" y="320" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_Breach_di" bpmnElement="T_Breach">
+        <dc:Bounds x="1370" y="260" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EE_Breach_di" bpmnElement="EE_Breach">
+        <dc:Bounds x="1542" y="282" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1510" y="320" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ICE_FirstResp1_di" bpmnElement="ICE_FirstResp1">
+        <dc:Bounds x="932" y="372" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="900" y="410" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EE_SLAOk1_di" bpmnElement="EE_SLAOk1">
+        <dc:Bounds x="1042" y="372" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1010" y="410" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ICE_FirstResp2_di" bpmnElement="ICE_FirstResp2">
+        <dc:Bounds x="1282" y="372" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1250" y="410" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EE_SLAOk2_di" bpmnElement="EE_SLAOk2">
+        <dc:Bounds x="1402" y="372" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1370" y="410" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_Notify_di" bpmnElement="T_Notify">
+        <dc:Bounds x="660" y="460" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_RecordResponse_di" bpmnElement="T_RecordResponse">
+        <dc:Bounds x="2280" y="460" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ITE_FirstResp_di" bpmnElement="ITE_FirstResp">
+        <dc:Bounds x="2452" y="482" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="2420" y="520" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_Close_di" bpmnElement="T_Close">
+        <dc:Bounds x="2840" y="460" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EBG_Reopen_di" bpmnElement="EBG_Reopen">
+        <dc:Bounds x="3005" y="475" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ICE_Reopen_di" bpmnElement="ICE_Reopen">
+        <dc:Bounds x="3112" y="402" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="3080" y="352" width="100" height="40" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ICE_2weeks_di" bpmnElement="ICE_2weeks">
+        <dc:Bounds x="3112" y="482" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="3080" y="520" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EE_Closed_di" bpmnElement="EE_Closed">
+        <dc:Bounds x="3222" y="482" width="36" height="36" />
+        <bpmndi:BPMNLabel><dc:Bounds x="3190" y="520" width="100" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_AIProposal_di" bpmnElement="T_AIProposal">
+        <dc:Bounds x="810" y="590" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_Free_di" bpmnElement="GW_Free" isMarkerVisible="true">
+        <dc:Bounds x="985" y="755" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="880" y="790" width="110" height="40" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_Take_di" bpmnElement="T_Take">
+        <dc:Bounds x="1070" y="740" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_Merge1_di" bpmnElement="GW_Merge1" isMarkerVisible="true">
+        <dc:Bounds x="1245" y="755" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_MergeLoop_di" bpmnElement="GW_MergeLoop" isMarkerVisible="true">
+        <dc:Bounds x="1345" y="755" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_Check_di" bpmnElement="T_Check">
+        <dc:Bounds x="1440" y="740" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_Competent_di" bpmnElement="GW_Competent" isMarkerVisible="true">
+        <dc:Bounds x="1615" y="755" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1585" y="722" width="110" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_Escalate_di" bpmnElement="T_Escalate">
+        <dc:Bounds x="1580" y="880" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_Merge2_di" bpmnElement="GW_Merge2" isMarkerVisible="true">
+        <dc:Bounds x="1775" y="755" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_Info_di" bpmnElement="GW_Info" isMarkerVisible="true">
+        <dc:Bounds x="1915" y="755" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1880" y="722" width="120" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_Extended_di" bpmnElement="GW_Extended" isMarkerVisible="true">
+        <dc:Bounds x="1915" y="895" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1880" y="950" width="120" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_RemoteDiag_di" bpmnElement="T_RemoteDiag">
+        <dc:Bounds x="1740" y="880" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_RequestInfo_di" bpmnElement="T_RequestInfo">
+        <dc:Bounds x="2020" y="880" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_Answer_di" bpmnElement="T_Answer">
+        <dc:Bounds x="2020" y="740" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_Merge3_di" bpmnElement="GW_Merge3" isMarkerVisible="true">
+        <dc:Bounds x="2195" y="755" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="GW_CloseNoReply_di" bpmnElement="GW_CloseNoReply" isMarkerVisible="true">
+        <dc:Bounds x="2615" y="755" width="50" height="50" />
+        <bpmndi:BPMNLabel><dc:Bounds x="2585" y="810" width="110" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_CloseDecision_di" bpmnElement="T_CloseDecision">
+        <dc:Bounds x="2700" y="740" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="T_HeadAssign_di" bpmnElement="T_HeadAssign">
+        <dc:Bounds x="1070" y="1030" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="F01_di" bpmnElement="F01">
+        <di:waypoint x="208" y="140" />
+        <di:waypoint x="250" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F02_di" bpmnElement="F02">
+        <di:waypoint x="370" y="140" />
+        <di:waypoint x="460" y="140" />
+        <di:waypoint x="460" y="460" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F03_di" bpmnElement="F03">
+        <di:waypoint x="520" y="500" />
+        <di:waypoint x="565" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F04_di" bpmnElement="F04">
+        <di:waypoint x="590" y="475" />
+        <di:waypoint x="590" y="300" />
+        <di:waypoint x="660" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F05_di" bpmnElement="F05">
+        <di:waypoint x="780" y="300" />
+        <di:waypoint x="825" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F06_di" bpmnElement="F06">
+        <di:waypoint x="875" y="300" />
+        <di:waypoint x="932" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F07_di" bpmnElement="F07">
+        <di:waypoint x="968" y="300" />
+        <di:waypoint x="1010" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F08_di" bpmnElement="F08">
+        <di:waypoint x="1130" y="300" />
+        <di:waypoint x="1175" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F09_di" bpmnElement="F09">
+        <di:waypoint x="1225" y="300" />
+        <di:waypoint x="1282" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F10_di" bpmnElement="F10">
+        <di:waypoint x="1318" y="300" />
+        <di:waypoint x="1370" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F11_di" bpmnElement="F11">
+        <di:waypoint x="1490" y="300" />
+        <di:waypoint x="1542" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F12_di" bpmnElement="F12">
+        <di:waypoint x="850" y="325" />
+        <di:waypoint x="850" y="390" />
+        <di:waypoint x="932" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F13_di" bpmnElement="F13">
+        <di:waypoint x="968" y="390" />
+        <di:waypoint x="1042" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F14_di" bpmnElement="F14">
+        <di:waypoint x="1200" y="325" />
+        <di:waypoint x="1200" y="390" />
+        <di:waypoint x="1282" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F15_di" bpmnElement="F15">
+        <di:waypoint x="1318" y="390" />
+        <di:waypoint x="1402" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F16_di" bpmnElement="F16">
+        <di:waypoint x="615" y="500" />
+        <di:waypoint x="660" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F17_di" bpmnElement="F17">
+        <di:waypoint x="720" y="540" />
+        <di:waypoint x="720" y="630" />
+        <di:waypoint x="810" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F18_di" bpmnElement="F18">
+        <di:waypoint x="930" y="630" />
+        <di:waypoint x="1010" y="630" />
+        <di:waypoint x="1010" y="755" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F19_di" bpmnElement="F19">
+        <di:waypoint x="1035" y="780" />
+        <di:waypoint x="1070" y="780" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1040" y="762" width="20" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F20_di" bpmnElement="F20">
+        <di:waypoint x="1010" y="805" />
+        <di:waypoint x="1010" y="1070" />
+        <di:waypoint x="1070" y="1070" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1016" y="835" width="22" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F21_di" bpmnElement="F21">
+        <di:waypoint x="1190" y="780" />
+        <di:waypoint x="1245" y="780" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F22_di" bpmnElement="F22">
+        <di:waypoint x="1190" y="1070" />
+        <di:waypoint x="1270" y="1070" />
+        <di:waypoint x="1270" y="805" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F23_di" bpmnElement="F23">
+        <di:waypoint x="1295" y="780" />
+        <di:waypoint x="1345" y="780" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F24_di" bpmnElement="F24">
+        <di:waypoint x="1395" y="780" />
+        <di:waypoint x="1440" y="780" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F25_di" bpmnElement="F25">
+        <di:waypoint x="1560" y="780" />
+        <di:waypoint x="1615" y="780" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F26_di" bpmnElement="F26">
+        <di:waypoint x="1640" y="805" />
+        <di:waypoint x="1640" y="880" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1648" y="835" width="22" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F27_di" bpmnElement="F27">
+        <di:waypoint x="1580" y="920" />
+        <di:waypoint x="1370" y="920" />
+        <di:waypoint x="1370" y="805" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F28_di" bpmnElement="F28">
+        <di:waypoint x="1665" y="780" />
+        <di:waypoint x="1775" y="780" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1690" y="762" width="20" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F29_di" bpmnElement="F29">
+        <di:waypoint x="1825" y="780" />
+        <di:waypoint x="1915" y="780" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F30_di" bpmnElement="F30">
+        <di:waypoint x="1965" y="780" />
+        <di:waypoint x="2020" y="780" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1975" y="762" width="20" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F31_di" bpmnElement="F31">
+        <di:waypoint x="1940" y="805" />
+        <di:waypoint x="1940" y="895" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1948" y="835" width="22" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F32_di" bpmnElement="F32">
+        <di:waypoint x="1915" y="920" />
+        <di:waypoint x="1860" y="920" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1878" y="900" width="20" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F33_di" bpmnElement="F33">
+        <di:waypoint x="1800" y="880" />
+        <di:waypoint x="1800" y="805" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F34_di" bpmnElement="F34">
+        <di:waypoint x="1965" y="920" />
+        <di:waypoint x="2020" y="920" />
+        <bpmndi:BPMNLabel><dc:Bounds x="1975" y="900" width="22" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F35_di" bpmnElement="F35">
+        <di:waypoint x="2140" y="920" />
+        <di:waypoint x="2220" y="920" />
+        <di:waypoint x="2220" y="805" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F36_di" bpmnElement="F36">
+        <di:waypoint x="2140" y="780" />
+        <di:waypoint x="2195" y="780" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F37_di" bpmnElement="F37">
+        <di:waypoint x="2245" y="780" />
+        <di:waypoint x="2340" y="780" />
+        <di:waypoint x="2340" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F38_di" bpmnElement="F38">
+        <di:waypoint x="2400" y="500" />
+        <di:waypoint x="2452" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F39_di" bpmnElement="F39">
+        <di:waypoint x="2488" y="500" />
+        <di:waypoint x="2520" y="500" />
+        <di:waypoint x="2520" y="140" />
+        <di:waypoint x="2540" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F40_di" bpmnElement="F40">
+        <di:waypoint x="2660" y="140" />
+        <di:waypoint x="2735" y="140" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F41_di" bpmnElement="F41">
+        <di:waypoint x="2760" y="165" />
+        <di:waypoint x="2760" y="740" />
+        <bpmndi:BPMNLabel><dc:Bounds x="2768" y="200" width="20" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F42_di" bpmnElement="F42">
+        <di:waypoint x="2760" y="115" />
+        <di:waypoint x="2760" y="60" />
+        <di:waypoint x="2200" y="60" />
+        <di:waypoint x="2200" y="708" />
+        <di:waypoint x="1370" y="708" />
+        <di:waypoint x="1370" y="755" />
+        <bpmndi:BPMNLabel><dc:Bounds x="2768" y="66" width="90" height="27" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F43_di" bpmnElement="F43">
+        <di:waypoint x="2640" y="198" />
+        <di:waypoint x="2640" y="755" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F50_di" bpmnElement="F50">
+        <di:waypoint x="2665" y="780" />
+        <di:waypoint x="2700" y="780" />
+        <bpmndi:BPMNLabel><dc:Bounds x="2668" y="762" width="20" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F51_di" bpmnElement="F51">
+        <di:waypoint x="2615" y="780" />
+        <di:waypoint x="2580" y="780" />
+        <di:waypoint x="2580" y="180" />
+        <bpmndi:BPMNLabel><dc:Bounds x="2584" y="762" width="22" height="14" /></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F44_di" bpmnElement="F44">
+        <di:waypoint x="2820" y="780" />
+        <di:waypoint x="2900" y="780" />
+        <di:waypoint x="2900" y="540" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F45_di" bpmnElement="F45">
+        <di:waypoint x="2960" y="500" />
+        <di:waypoint x="3005" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F46_di" bpmnElement="F46">
+        <di:waypoint x="3030" y="475" />
+        <di:waypoint x="3030" y="420" />
+        <di:waypoint x="3112" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F47_di" bpmnElement="F47">
+        <di:waypoint x="3148" y="420" />
+        <di:waypoint x="3320" y="420" />
+        <di:waypoint x="3320" y="680" />
+        <di:waypoint x="1270" y="680" />
+        <di:waypoint x="1270" y="755" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F48_di" bpmnElement="F48">
+        <di:waypoint x="3055" y="500" />
+        <di:waypoint x="3112" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F49_di" bpmnElement="F49">
+        <di:waypoint x="3148" y="500" />
+        <di:waypoint x="3222" y="500" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ANN_SLA_di" bpmnElement="ANN_SLA"><dc:Bounds x="600" y="372" width="240" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Assoc_ANN_SLA_di" bpmnElement="Assoc_ANN_SLA">
+        <di:waypoint x="720" y="340" />
+        <di:waypoint x="720" y="372" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ANN_Notify_di" bpmnElement="ANN_Notify"><dc:Bounds x="800" y="462" width="380" height="56" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Assoc_ANN_Notify_di" bpmnElement="Assoc_ANN_Notify">
+        <di:waypoint x="780" y="500" />
+        <di:waypoint x="800" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ANN_AI_di" bpmnElement="ANN_AI"><dc:Bounds x="1080" y="578" width="340" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Assoc_ANN_AI_di" bpmnElement="Assoc_ANN_AI">
+        <di:waypoint x="930" y="600" />
+        <di:waypoint x="1080" y="610" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ANN_First_di" bpmnElement="ANN_First"><dc:Bounds x="2280" y="380" width="225" height="62" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Assoc_ANN_First_di" bpmnElement="Assoc_ANN_First">
+        <di:waypoint x="2470" y="482" />
+        <di:waypoint x="2470" y="442" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ANN_Client_di" bpmnElement="ANN_Client"><dc:Bounds x="2230" y="165" width="270" height="70" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Assoc_ANN_Client_di" bpmnElement="Assoc_ANN_Client">
+        <di:waypoint x="2622" y="180" />
+        <di:waypoint x="2500" y="205" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
