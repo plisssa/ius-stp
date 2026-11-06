@@ -1,0 +1,440 @@
+openapi: 3.1.0
+info:
+  title: ИУС СТП — API портала клиента, рабочего места и отчётов
+  version: 0.1.0
+  description: >
+    Контракт для spec 001-stp-ticket-processing. В описаниях операций — ссылки на FR спецификации.
+    Ошибки: 401 — не выполнен вход; 403 — заявка чужой организации или недостаточно прав;
+    404 — нет заявки; 409 — недопустимый переход статуса или правило времени не выполнено;
+    422 — ошибка проверки данных.
+servers:
+  - url: /api/v1
+tags:
+  - name: portal
+    description: Портал клиента (C-PORTAL)
+  - name: desk
+    description: Рабочее место инженера и руководителя (C-DESK)
+  - name: reports
+    description: Отчётность (C-REPORT)
+  - name: admin
+    description: Администрирование
+paths:
+  /tickets:
+    post:
+      tags: [portal]
+      summary: Создать заявку (FR-001, FR-002, FR-003, FR-006)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TicketCreate' }
+      responses:
+        '201':
+          description: Заявка зарегистрирована
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ticket' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    get:
+      tags: [portal]
+      summary: Заявки своей организации (FR-004)
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/TicketStatus' } }
+      responses:
+        '200':
+          description: Список
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Ticket' } }
+  /tickets/{number}:
+    get:
+      tags: [portal, desk]
+      summary: Карточка заявки (FR-004, FR-006)
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      responses:
+        '200':
+          description: Заявка
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TicketDetails' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /tickets/{number}/messages:
+    post:
+      tags: [portal]
+      summary: Сообщение клиента (FR-017); переводит заявку в waiting_for_support
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MessageCreate' }
+      responses:
+        '201': { description: 'Сообщение добавлено' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /tickets/{number}/feedback:
+    post:
+      tags: [portal]
+      summary: Обратная связь по решению (FR-017, FR-019)
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [resolved]
+              properties:
+                resolved: { type: boolean, description: 'true — помогло и клиент согласен закрыть; false — не помогло' }
+                comment: { type: string }
+      responses:
+        '200': { description: 'Заявка закрыта (resolved) или возвращена исполнителю' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /tickets/{number}/reopen:
+    post:
+      tags: [portal]
+      summary: Возобновить закрытую заявку не позднее 14 дней (FR-020)
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      responses:
+        '200': { description: 'Статус waiting_for_support, исполнитель прежний' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /desk/queue:
+    get:
+      tags: [desk]
+      summary: Очередь с оставшимся временем SLA (FR-006)
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/TicketStatus' } }
+        - { name: priority, in: query, schema: { $ref: '#/components/schemas/Priority' } }
+        - { name: organization_id, in: query, schema: { type: string } }
+        - { name: assignee_id, in: query, schema: { type: string, description: 'unassigned — без исполнителя' } }
+      responses:
+        '200':
+          description: Очередь
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Ticket' } }
+  /desk/tickets/{number}/responses:
+    post:
+      tags: [desk]
+      summary: Ответ инженера (FR-010); первый ответ назначает исполнителя и отмечает SLA
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind, body]
+              properties:
+                kind: { type: string, enum: [answer, info_request, priority_justification_request] }
+                body: { type: string }
+                from_proposal_id: { type: string, description: 'Если текст основан на утверждённом черновике ассистента' }
+      responses:
+        '201': { description: 'Ответ опубликован, статус waiting_for_customer' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /desk/tickets/{number}/assignee:
+    patch:
+      tags: [desk]
+      summary: Назначить или сменить исполнителя (FR-012)
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssigneeChange' }
+      responses:
+        '200': { description: 'Исполнитель изменён, событие в истории' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /desk/tickets/{number}/escalate:
+    post:
+      tags: [desk]
+      summary: Эскалация на инженера более высокого уровня (FR-015)
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssigneeChange' }
+      responses:
+        '200': { description: 'Заявка эскалирована' }
+        '409': { description: 'Нет инженеров более высокого уровня или выбран инженер не выше текущего уровня' }
+  /desk/tickets/{number}/priority:
+    patch:
+      tags: [desk]
+      summary: Изменить приоритет с причиной (FR-014)
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [priority, reason]
+              properties:
+                priority: { $ref: '#/components/schemas/Priority' }
+                reason: { type: string, minLength: 1 }
+      responses:
+        '200': { description: 'Приоритет изменён; дедлайн SLA не пересчитывается' }
+  /desk/tickets/{number}/installation:
+    patch:
+      tags: [desk]
+      summary: Исправить параметры инсталляции (FR-014)
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [installation_id, reason]
+              properties:
+                installation_id: { type: string }
+                reason: { type: string, minLength: 1 }
+      responses:
+        '200': { description: 'Инсталляция исправлена' }
+  /desk/tickets/{number}/remote-work-consent:
+    post:
+      tags: [desk]
+      summary: Зафиксировать согласие клиента на работы с приостановкой ПО (FR-016)
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [consent_message_id]
+              properties:
+                consent_message_id: { type: string }
+      responses:
+        '200': { description: 'Согласие зафиксировано' }
+        '409': { description: 'Организация без расширенной поддержки' }
+  /desk/tickets/{number}/close:
+    post:
+      tags: [desk]
+      summary: Закрыть заявку (FR-018, FR-019)
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, enum: [resolved, no_customer_reply] }
+      responses:
+        '200': { description: 'Заявка закрыта' }
+        '409': { description: 'Для no_customer_reply не прошло 3 рабочих дня или клиент ответил' }
+  /desk/engineers/availability:
+    get:
+      tags: [desk]
+      summary: Данные для решения о назначении (FR-013)
+      parameters:
+        - { name: organization_id, in: query, required: true, schema: { type: string } }
+      responses:
+        '200':
+          description: Инженеры
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    engineer_id: { type: string }
+                    full_name: { type: string }
+                    level: { type: string, enum: [L1, L2, L3] }
+                    active_tickets: { type: integer }
+                    competences: { type: array, items: { type: string } }
+                    past_tickets_of_organization: { type: integer }
+  /desk/tickets/{number}/proposal:
+    get:
+      tags: [desk]
+      summary: Предложение ИИ-ассистента (FR-023)
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      responses:
+        '200':
+          description: Предложение или пометка «Ассистент недоступен»
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Proposal' }
+  /desk/tickets/{number}/proposal/decision:
+    post:
+      tags: [desk]
+      summary: Решение человека по предложению (FR-024, FR-027)
+      parameters: [ { $ref: '#/components/parameters/Number' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action: { type: string, enum: [approve, edit, reject] }
+                edits:
+                  type: object
+                  description: Изменённые значения при action=edit
+                  properties:
+                    type_code: { type: string }
+                    assignee_id: { type: string }
+                    draft_reply: { type: string }
+      responses:
+        '200': { description: 'Решение записано; применение — только по этому вызову' }
+  /reports/tickets-by-type:
+    get:
+      tags: [reports]
+      summary: Число заявок по типам за период (FR-021)
+      parameters: [ { $ref: '#/components/parameters/From' }, { $ref: '#/components/parameters/To' } ]
+      responses:
+        '200': { $ref: '#/components/responses/CountReport' }
+  /reports/tickets-by-priority:
+    get:
+      tags: [reports]
+      summary: Число заявок по приоритетам за период (FR-021)
+      parameters: [ { $ref: '#/components/parameters/From' }, { $ref: '#/components/parameters/To' } ]
+      responses:
+        '200': { $ref: '#/components/responses/CountReport' }
+  /reports/unsatisfied-clients:
+    get:
+      tags: [reports]
+      summary: Сотрудники клиентов с заявками, не закрытыми «решено», за период (FR-021)
+      parameters: [ { $ref: '#/components/parameters/From' }, { $ref: '#/components/parameters/To' } ]
+      responses:
+        '200':
+          description: Список
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    client_user_id: { type: string }
+                    full_name: { type: string }
+                    organization: { type: string }
+                    unsatisfied_tickets: { type: array, items: { type: string, description: 'Номер ES-NNNN' } }
+  /admin/assistant:
+    put:
+      tags: [admin]
+      summary: Включение и отключение ассистента и его функций (FR-026)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled: { type: boolean }
+                functions_enabled:
+                  type: object
+                  properties:
+                    A1: { type: boolean }
+                    A2: { type: boolean }
+                    A3: { type: boolean }
+                    A4: { type: boolean }
+      responses:
+        '200': { description: 'Настройки сохранены' }
+components:
+  parameters:
+    Number:
+      name: number
+      in: path
+      required: true
+      schema: { type: string, pattern: '^ES-\d{4,}$' }
+    From:
+      name: from
+      in: query
+      required: true
+      schema: { type: string, format: date }
+    To:
+      name: to
+      in: query
+      required: true
+      schema: { type: string, format: date }
+  responses:
+    ValidationError: { description: 'Ошибка проверки данных' }
+    Forbidden: { description: 'Нет доступа (заявка другой организации или недостаточно прав)' }
+    NotFound: { description: 'Заявка не найдена' }
+    Conflict: { description: 'Недопустимый переход статуса или не выполнено правило времени' }
+    CountReport:
+      description: Отчёт-счётчик
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                key: { type: string }
+                count: { type: integer }
+  schemas:
+    TicketStatus:
+      type: string
+      enum: [waiting_for_support, waiting_for_customer, closed]
+      description: 'Отображение: Waiting for support, Waiting for customer, Closed'
+    Priority:
+      type: string
+      enum: [P1, P2, P3, P4]
+    SlaState:
+      type: string
+      enum: [pending, met, breached]
+    TicketCreate:
+      type: object
+      required: [subject, description, type_code, priority, installation_id]
+      properties:
+        subject: { type: string, minLength: 1 }
+        description: { type: string, minLength: 1 }
+        type_code: { type: string, enum: [functionality, configuration, defect, release] }
+        priority: { $ref: '#/components/schemas/Priority' }
+        installation_id: { type: string }
+        attachment_ids: { type: array, items: { type: string } }
+    Ticket:
+      type: object
+      properties:
+        number: { type: string, pattern: '^ES-\d{4,}$', example: ES-9181 }
+        subject: { type: string }
+        organization: { type: string }
+        author: { type: string }
+        type_code: { type: string }
+        priority: { $ref: '#/components/schemas/Priority' }
+        status: { $ref: '#/components/schemas/TicketStatus' }
+        assignee: { type: [string, 'null'], description: 'null — Unassigned' }
+        first_response_due_at: { type: string, format: date-time }
+        sla_state: { $ref: '#/components/schemas/SlaState' }
+        sla_remaining_minutes: { type: [integer, 'null'] }
+    TicketDetails:
+      allOf:
+        - $ref: '#/components/schemas/Ticket'
+        - type: object
+          properties:
+            messages: { type: array, items: { type: object } }
+            history: { type: array, items: { type: object } }
+            close_reason: { type: [string, 'null'], enum: [resolved, no_customer_reply, null] }
+            reopen_until: { type: [string, 'null'], format: date-time }
+            extended_support: { type: boolean }
+    MessageCreate:
+      type: object
+      required: [body]
+      properties:
+        body: { type: string, minLength: 1 }
+        attachment_ids: { type: array, items: { type: string } }
+    AssigneeChange:
+      type: object
+      required: [engineer_id, reason]
+      properties:
+        engineer_id: { type: string }
+        reason: { type: string, minLength: 1 }
+    Proposal:
+      type: object
+      properties:
+        status: { type: string, enum: [proposed, approved, edited, rejected, unavailable] }
+        suggested_type: { type: string }
+        priority_flag: { type: string, enum: [ok, possibly_higher, possibly_lower] }
+        suggested_assignee: { type: string }
+        draft_reply: { type: string }
+        rationale: { type: string }
+        sources: { type: array, items: { type: string } }
+        confidence: { type: number, minimum: 0, maximum: 1 }
