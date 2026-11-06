@@ -5,12 +5,12 @@
 | Артефакт | Файл | Готовность |
 |---|---|---|
 | Модель процессов + обоснование нотации и CASE-средства | `models/stp-process.bpmn`, `models/use-cases.svg`, `docs/01-process-analysis.md` | G1 ✅ (07.11) |
-| Функциональные и нефункциональные требования, KPI | `docs/02-requirements.md` | черновик → G2 |
-| EARS-спецификация с критериями приёмки (10–15) | `docs/03-ears.md` | черновик (15 шт.) → G2 |
-| Требования к ИИ-компоненту | `docs/04-ai-requirements.md` | черновик → G2 |
-| Constitution (5–7 принципов) | `.specify/memory/constitution.md` | черновик (7 принципов) → G2 |
+| Функциональные и нефункциональные требования, KPI | `docs/02-requirements.md` | G2 ✅ (07.11) |
+| EARS-спецификация с критериями приёмки (10–15) | `docs/03-ears.md` | 15 шт., G2 ✅ (07.11) |
+| Требования к ИИ-компоненту | `docs/04-ai-requirements.md` | G2 ✅ (07.11) |
+| Constitution (5–7 принципов) | `.specify/memory/constitution.md` | 7 принципов, версия 1.0.0, G2 ✅ (07.11) |
 | Артефакты SDD-цикла: spec / plan / tasks | `specs/001-stp-ticket-processing/` | spec — G3 ✅, plan — G4 ✅, tasks → G5 |
-| Матрица трассируемости | `docs/05-traceability.md` | версия этапа 1 → G5 |
+| Матрица трассируемости | `docs/05-traceability.md` | G5 ✅ (06.11) |
 | Журнал действий агента с human-gates | `journal/agent-log.md` | ведётся |
 
 ## Human-gates этапа
