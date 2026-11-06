@@ -9,8 +9,8 @@
 | EARS-спецификация с критериями приёмки (10–15) | `docs/03-ears.md` | черновик (15 шт.) → G2 |
 | Требования к ИИ-компоненту | `docs/04-ai-requirements.md` | черновик → G2 |
 | Constitution (5–7 принципов) | `.specify/memory/constitution.md` | черновик (7 принципов) → G2 |
-| Артефакты SDD-цикла: spec / plan / tasks | `specs/…` (создаст Spec Kit) | не начато → G3, G4, G5 |
-| Матрица трассируемости | `docs/05-traceability.md` | черновик → G5 |
+| Артефакты SDD-цикла: spec / plan / tasks | `specs/001-stp-ticket-processing/` | spec — G3 ✅, plan — G4 ✅, tasks → G5 |
+| Матрица трассируемости | `docs/05-traceability.md` | версия этапа 1 → G5 |
 | Журнал действий агента с human-gates | `journal/agent-log.md` | ведётся |
 
 ## Human-gates этапа
