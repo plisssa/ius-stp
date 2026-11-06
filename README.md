@@ -12,7 +12,6 @@
 
 ```
 README.md                    — этот файл
-constitution.md              — принципы P1–P7 (Spec Kit)
 docs/
   00-plan-stage1.md          — план этапа 1, gates, команды Spec Kit, вопросы преподавателю
   01-process-analysis.md     — объект, роли, BR-01…23, статусы, AS-IS/TO-BE, ASM, выбор нотации и CASE
@@ -25,7 +24,9 @@ models/
 journal/
   agent-log.md               — журнал действий ИИ-агента с human-gates
   agent-weaknesses.md        — заготовки для раздела «Что ИИ-агент сделал плохо»
-specs/                       — появится после /speckit.specify: spec.md, plan.md, tasks.md
+.specify/memory/constitution.md — принципы P1–P7 (конституция Spec Kit)
+.specify/                    — шаблоны и скрипты Spec Kit
+specs/                       — артефакты SDD-цикла: spec.md, plan.md, tasks.md
 ```
 
 ## Схема идентификаторов
@@ -38,7 +39,7 @@ specs/                       — появится после /speckit.specify: s
 | ФТ / НФТ / KPI | Требования и показатели | `docs/02` |
 | EARS-xx | Ключевое требование в EARS | `docs/03` |
 | ИИ-xx | Требование к ИИ-компоненту | `docs/04` |
-| P1–P7 | Принцип constitution | `constitution.md` |
+| P1–P7 | Принцип constitution | `.specify/memory/constitution.md` |
 | T_ / GW_ / ICE_ … | Элементы BPMN-модели | `models/stp-process.bpmn` |
 | C- / MCP- | Предварительные компоненты архитектуры | `docs/05` §5.1 |
 
