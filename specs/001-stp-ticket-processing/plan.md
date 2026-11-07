@@ -1,6 +1,6 @@
 # Implementation Plan: Обработка обращений в службу технической поддержки (СТП)
 
-**Branch**: `stage1/speckit` (feature `001-stp-ticket-processing`) | **Date**: 2026-11-06 | **Spec**: [spec.md](./spec.md)
+**Branch**: `main` (feature `001-stp-ticket-processing`) | **Date**: 2026-11-06 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/001-stp-ticket-processing/spec.md`
 
@@ -22,7 +22,7 @@
 
 **Testing**: pytest, httpx-клиент FastAPI, подмена времени (time-machine), контрактные тесты против `contracts/http-api.yaml`, набор тестов на prompt injection
 
-**Target Platform**: Linux-сервер, контейнеры Docker Compose (app, worker, postgres, assistant, mcp-tickets, mcp-kb, mcp-staff; в прототипе — Mailpit и заглушка Slack)
+**Target Platform**: Linux-сервер, контейнеры Docker Compose (app, worker, postgres, assistant, mcp-tickets, mcp-kb, mcp-staff; в тестовой среде — Mailpit и заглушка Slack)
 
 **Project Type**: web-service с серверным веб-интерфейсом и отдельными процессами ИИ-ассистента и MCP-серверов
 
