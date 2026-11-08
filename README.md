@@ -46,7 +46,8 @@ models/
   use-cases.svg                   — UML-диаграмма вариантов использования
 .specify/memory/constitution.md   — конституция проекта: 7 принципов
 specs/001-stp-ticket-processing/  — спецификация (spec), план (plan) и задачи (tasks), подготовленные в GitHub Spec Kit
-journal/agent-log.md              — журнал SDD-цикла: действия ИИ-агента и точки утверждения
+journal/1-sdd-cycle/              — журнал работы над проектом: действия ИИ-агента и точки утверждения
+journal/2-ai-assistant/           — пример журнала ИИ-ассистента системы на тестовых заявках
 reports/                          — отчёт по этапу 1 (PDF и Word)
 .specify/                         — шаблоны и скрипты Spec Kit
 ```
