@@ -1,6 +1,6 @@
 # Implementation Plan: Обработка обращений в службу технической поддержки (СТП)
 
-**Branch**: `main` (feature `001-stp-ticket-processing`) | **Date**: 2026-11-06, уточнён 2026-11-07 | **Spec**: [spec.md](./spec.md)
+**Branch**: `main` (feature `001-stp-ticket-processing`) | **Date**: 2026-11-06 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/001-stp-ticket-processing/spec.md`
 
