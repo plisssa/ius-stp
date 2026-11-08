@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_STP" targetNamespace="http://bpmn.io/schema/bpmn">
   <bpmn:collaboration id="Collaboration_STP">
-    <bpmn:participant id="Participant_STP" name="Обработка обращения в СТП (TO-BE, вариант 12)" processRef="Process_STP" />
+    <bpmn:participant id="Participant_STP" name="Обработка обращения в СТП (вариант 12)" processRef="Process_STP" />
   </bpmn:collaboration>
   <bpmn:process id="Process_STP" name="Обработка обращения в СТП" isExecutable="false">
     <bpmn:documentation>Модель автоматизируемого процесса по кейсу 12. Правила BR-xx и допущения ASM-xx — docs/01-process-analysis.md.</bpmn:documentation>
@@ -37,7 +37,7 @@
         <bpmn:flowNodeRef>ICE_2weeks</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>EE_Closed</bpmn:flowNodeRef>
       </bpmn:lane>
-      <bpmn:lane id="Lane_AI" name="ИИ-ассистент (TO-BE, только предлагает)">
+      <bpmn:lane id="Lane_AI" name="ИИ-ассистент (только предлагает)">
         <bpmn:flowNodeRef>T_AIProposal</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_Engineer" name="Инженер ТП">
@@ -190,7 +190,7 @@
       <bpmn:incoming>F49</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:serviceTask id="T_AIProposal" name="Подготовить предложение: тип, приоритет, исполнитель, черновик">
-      <bpmn:documentation>TO-BE. ИИ-01…ИИ-12. Только предложение; при недоступности — процесс идёт без него (ИИ-08).</bpmn:documentation>
+      <bpmn:documentation>Требования ИИ-01…ИИ-12. Только предложение; при недоступности — процесс идёт без него (ИИ-08).</bpmn:documentation>
       <bpmn:incoming>F17</bpmn:incoming>
       <bpmn:outgoing>F18</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -339,7 +339,7 @@
     <bpmn:association id="Assoc_ANN_SLA" associationDirection="None" sourceRef="T_StartSLA" targetRef="ANN_SLA" />
     <bpmn:textAnnotation id="ANN_Notify"><bpmn:text>Уведомления (отдельное письмо + канал Slack) уходят также при каждом обновлении и смене статуса заявки (BR-12).</bpmn:text></bpmn:textAnnotation>
     <bpmn:association id="Assoc_ANN_Notify" associationDirection="None" sourceRef="T_Notify" targetRef="ANN_Notify" />
-    <bpmn:textAnnotation id="ANN_AI"><bpmn:text>TO-BE. Уровень «черновик + human-gate»: ассистент только предлагает, решения принимают инженер и руководитель. Клиенту ничего не отправляется без утверждения (P2). Нет доступа к серверам клиентов (P5).</bpmn:text></bpmn:textAnnotation>
+    <bpmn:textAnnotation id="ANN_AI"><bpmn:text>Уровень «черновик + утверждение человеком»: ассистент только предлагает, решения принимают инженер и руководитель. Клиенту ничего не отправляется без утверждения (P2). Нет доступа к серверам клиентов (P5).</bpmn:text></bpmn:textAnnotation>
     <bpmn:association id="Assoc_ANN_AI" associationDirection="None" sourceRef="T_AIProposal" targetRef="ANN_AI" />
     <bpmn:textAnnotation id="ANN_First"><bpmn:text>Сигнал выдаётся только при первом ответе: он завершает ветку контроля SLA (BR-09, BR-16).</bpmn:text></bpmn:textAnnotation>
     <bpmn:association id="Assoc_ANN_First" associationDirection="None" sourceRef="ITE_FirstResp" targetRef="ANN_First" />
