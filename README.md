@@ -14,9 +14,29 @@
 
 ## Процесс обработки обращения (BPMN 2.0)
 
-![Модель процесса обработки обращения в BPMN 2.0](docs/img/stp-process.svg)
+[![Модель процесса обработки обращения в BPMN 2.0](docs/img/stp-process.svg)](docs/img/stp-process.svg)
 
-Исходная модель — [`models/stp-process.bpmn`](models/stp-process.bpmn) (Camunda Modeler). Описание элементов и бизнес-правил — [`docs/01-process-analysis.md`](docs/01-process-analysis.md).
+**Как приблизить:** нажмите на схему — она откроется отдельно в полном размере. Это векторный рисунок: его можно увеличивать (Ctrl/⌘ и «+», жест на тачпаде) без потери чёткости. Ниже — те же части процесса крупнее.
+
+<details>
+<summary><b>Часть 1.</b> Регистрация заявки, контроль срока первого ответа, предложение ИИ-ассистента, назначение исполнителя</summary>
+
+[![Часть 1 модели: регистрация, контроль срока, предложение ассистента, назначение](docs/img/stp-process-part1.svg)](docs/img/stp-process-part1.svg)
+</details>
+
+<details>
+<summary><b>Часть 2.</b> Проверка заявки, эскалация, диагностика и подготовка ответа</summary>
+
+[![Часть 2 модели: проверка, эскалация, диагностика, ответ](docs/img/stp-process-part2.svg)](docs/img/stp-process-part2.svg)
+</details>
+
+<details>
+<summary><b>Часть 3.</b> Первый ответ, ожидание клиента, закрытие и возобновление заявки</summary>
+
+[![Часть 3 модели: ответ, ожидание клиента, закрытие, возобновление](docs/img/stp-process-part3.svg)](docs/img/stp-process-part3.svg)
+</details>
+
+Исходная модель — [`models/stp-process.bpmn`](models/stp-process.bpmn): открывается в Camunda Modeler или без установки на [demo.bpmn.io](https://demo.bpmn.io) (перетащите файл в окно браузера) — там схему можно двигать, приближать и смотреть свойства элементов. Описание элементов и бизнес-правил — [`docs/01-process-analysis.md`](docs/01-process-analysis.md).
 
 ## Жизненный цикл заявки
 
