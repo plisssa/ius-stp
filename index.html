@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Модель процесса СТП</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600&family=PT+Sans:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.11.1/dist/assets/diagram-js.css">
+<link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.11.1/dist/assets/bpmn-js.css">
+<style>
+/* Интерактивная модель процесса: шапка с частями процесса, схема, панель описания элемента */
+:root {
+  --bg: #F3F4F1; --surface: #FFFFFF; --canvas: #FFFFFF; --fg: #1D2B3A; --muted: #5E6A79;
+  --line: #D6DCE3; --accent: #2B63C6; --accent-soft: #E3EBF9; --warm: #B65A1F;
+  --display: 'Rubik', 'Trebuchet MS', Arial, sans-serif; --text: 'PT Sans', Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root {
+  --bg: #141C26; --surface: #1D2733; --fg: #E8ECF1; --muted: #A3AFBD;
+  --line: #2F3B4A; --accent: #7EA6F0; --accent-soft: #24344D; --warm: #E9A36B; color-scheme: dark } }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--text); font-size: 15px; }
+a { color: var(--accent); }
+.app { height: 100%; box-sizing: border-box; display: grid; grid-template-rows: auto 1fr; gap: 12px; padding: 14px max(16px, env(safe-area-inset-right, 0px)) 14px max(16px, env(safe-area-inset-left, 0px)); }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; }
+.titles { display: grid; gap: 4px; min-width: 0; }
+h1 { font-family: var(--display); font-weight: 600; font-size: 1.45rem; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+button { font: 600 0.9rem var(--text); color: var(--fg); background: var(--surface); border: 1px solid var(--line);
+  border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+button:hover { border-color: var(--accent); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.zoom button { min-width: 36px; padding-inline: 10px; }
+main { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 12px; }
+.stage { position: relative; min-height: 0; background: var(--canvas); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+#canvas { position: absolute; inset: 0; }
+.hint { position: absolute; left: 12px; bottom: 10px; margin: 0; font-size: 0.8rem; color: #5E6A79;
+  background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 6px; pointer-events: none; }
+aside { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid;
+  align-content: start; gap: 10px; min-width: 0; overflow: auto; }
+aside h2 { font-family: var(--display); font-weight: 500; font-size: 1.05rem; margin: 0; }
+.label { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.id { font-family: ui-monospace, Menlo, monospace; color: var(--warm); font-size: 0.9rem; margin: 0; overflow-wrap: anywhere; }
+.doc, .empty { margin: 0; line-height: 1.45; }
+.empty { color: var(--muted); }
+dl { margin: 0; display: grid; gap: 8px; }
+dt { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+dd { margin: 0; }
+.djs-element { cursor: pointer; }
+.is-selected .djs-visual > :first-child { stroke: #2B63C6 !important; stroke-width: 3px !important; }
+.in-group .djs-visual > :first-child { stroke: #B65A1F !important; }
+@media (max-width: 760px) {
+  .app { height: auto; min-height: 100%; }
+  main { grid-template-columns: 1fr; grid-template-rows: minmax(380px, 70vh) auto; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="titles">
+      <h1>Модель процесса обработки обращения в СТП</h1>
+      <p class="sub">BPMN 2.0 · вариант 12 · файл <a href="models/stp-process.bpmn">models/stp-process.bpmn</a> · <a href="https://github.com/plisssa/ius-stp">репозиторий проекта</a></p>
+    </div>
+    <div class="controls">
+      <div class="chips" role="group" aria-label="Части процесса">
+        <button type="button" data-group="all" aria-pressed="true">Вся модель</button>
+        <button type="button" data-group="reg" aria-pressed="false">Регистрация</button>
+        <button type="button" data-group="sla" aria-pressed="false">Контроль срока</button>
+        <button type="button" data-group="ai" aria-pressed="false">ИИ-ассистент</button>
+        <button type="button" data-group="eng" aria-pressed="false">Работа инженера</button>
+        <button type="button" data-group="wait" aria-pressed="false">Ответ и ожидание клиента</button>
+        <button type="button" data-group="close" aria-pressed="false">Закрытие и возобновление</button>
+      </div>
+      <div class="chips zoom" role="group" aria-label="Масштаб">
+        <button type="button" id="zoom-in" aria-label="Увеличить">+</button>
+        <button type="button" id="zoom-out" aria-label="Уменьшить">−</button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="stage">
+      <div id="canvas" aria-label="Диаграмма BPMN"></div>
+      <p class="hint">Перетаскивайте схему мышью · Ctrl или ⌘ + колёсико — масштаб · щелчок по элементу — описание</p>
+    </div>
+    <aside aria-live="polite">
+      <p class="label">Элемент модели</p>
+      <div id="details"><p class="empty">Щёлкните по задаче, событию или шлюзу — здесь появятся его название, тип, дорожка и правила кейса, на которых он основан.</p></div>
+    </aside>
+  </main>
+</div>
+<script src="https://unpkg.com/bpmn-js@17.11.1/dist/bpmn-navigated-viewer.production.min.js"></script>
+<script>
+const TYPES = {
+  'bpmn:StartEvent': 'начальное событие', 'bpmn:EndEvent': 'конечное событие', 'bpmn:Task': 'задача',
+  'bpmn:UserTask': 'задача человека', 'bpmn:ServiceTask': 'задача системы', 'bpmn:SendTask': 'отправка сообщения',
+  'bpmn:ReceiveTask': 'получение сообщения', 'bpmn:ExclusiveGateway': 'шлюз «или — или»', 'bpmn:ParallelGateway': 'параллельный шлюз',
+  'bpmn:EventBasedGateway': 'шлюз по событиям: что наступит раньше', 'bpmn:IntermediateCatchEvent': 'ожидание события',
+  'bpmn:IntermediateThrowEvent': 'порождение события', 'bpmn:BoundaryEvent': 'граничное событие на задаче',
+  'bpmn:SequenceFlow': 'поток управления', 'bpmn:TextAnnotation': 'пояснение'
+};
+const KIND = { TimerEventDefinition: 'таймер', SignalEventDefinition: 'сигнал', MessageEventDefinition: 'сообщение' };
+const GROUPS = {
+  reg: ['SE_Need', 'T_Submit', 'T_Register', 'GW_Split', 'T_Notify'],
+  sla: ['T_StartSLA', 'EBG_SLA1', 'ICE_Warn', 'T_Warn', 'EBG_SLA2', 'ICE_Breach', 'T_Breach', 'EE_Breach', 'ICE_FirstResp1', 'EE_SLAOk1', 'ICE_FirstResp2', 'EE_SLAOk2'],
+  ai: ['T_AIProposal', 'GW_Free'],
+  eng: ['GW_Free', 'T_Take', 'T_HeadAssign', 'GW_Merge1', 'GW_MergeLoop', 'T_Check', 'GW_Competent', 'T_Escalate', 'GW_Merge2', 'GW_Info', 'GW_Extended', 'T_RemoteDiag', 'T_RequestInfo', 'T_Answer', 'GW_Merge3'],
+  wait: ['T_RecordResponse', 'ITE_FirstResp', 'T_ClientReview', 'BT_3days', 'GW_Solved'],
+  close: ['GW_CloseNoReply', 'T_CloseDecision', 'T_Close', 'EBG_Reopen', 'ICE_Reopen', 'ICE_2weeks', 'EE_Closed']
+};
+const details = document.getElementById('details');
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const showError = (msg) => { details.innerHTML = '<p class="empty">' + esc(msg) + '</p>'; };
+
+async function start() {
+  if (typeof BpmnJS === 'undefined') { showError('Не удалось загрузить просмотрщик BPMN. Проверьте подключение к интернету и обновите страницу.'); return; }
+  let xml;
+  try {
+    const r = await fetch('models/stp-process.bpmn', { cache: 'no-cache' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    xml = await r.text();
+  } catch (e) { showError('Не удалось загрузить файл модели: ' + e.message); return; }
+  const viewer = new BpmnJS({ container: '#canvas' });
+  try { await viewer.importXML(xml); } catch (e) { showError('Модель не открылась: ' + (e && e.message ? e.message : e)); return; }
+  const canvas = viewer.get('canvas');
+  const registry = viewer.get('elementRegistry');
+  const lanes = registry.filter((e) => e.type === 'bpmn:Lane');
+  let selected = null, grouped = [];
+  const fit = () => canvas.zoom('fit-viewport', 'auto');
+  fit();
+
+  const laneOf = (el) => {
+    if (!el || el.waypoints) return '—';
+    const cx = el.x + el.width / 2, cy = el.y + el.height / 2;
+    const lane = lanes.find((l) => cx >= l.x && cx <= l.x + l.width && cy >= l.y && cy <= l.y + l.height);
+    return lane ? lane.businessObject.name : '—';
+  };
+  const describe = (el) => {
+    const bo = el.businessObject;
+    const defs = (bo.eventDefinitions || []).map((d) => KIND[d.$type.replace('bpmn:', '')]).filter(Boolean);
+    const type = (TYPES[el.type] || el.type.replace('bpmn:', '')) + (defs.length ? ' (' + defs.join(', ') + ')' : '');
+    const name = bo.name || (el.type === 'bpmn:TextAnnotation' ? '' : 'без названия');
+    const doc = (bo.documentation && bo.documentation[0] && bo.documentation[0].text) || bo.text || '';
+    const extra = el.type === 'bpmn:BoundaryEvent' && bo.attachedToRef
+      ? '<div><dt>Висит на задаче</dt><dd>' + esc(bo.attachedToRef.name || bo.attachedToRef.id) + '</dd></div>' : '';
+    details.innerHTML = (name ? '<h2>' + esc(name) + '</h2>' : '') + '<p class="id">' + esc(el.id) + '</p>' +
+      '<dl><div><dt>Тип</dt><dd>' + esc(type) + '</dd></div><div><dt>Дорожка</dt><dd>' + esc(laneOf(el)) + '</dd></div>' + extra + '</dl>' +
+      (doc ? '<p class="label">Описание и правила кейса</p><p class="doc">' + esc(doc) + '</p>' : '');
+  };
+  viewer.get('eventBus').on('element.click', (e) => {
+    const el = e.element;
+    if (!el || ['bpmn:Process', 'bpmn:Collaboration', 'bpmn:Participant', 'bpmn:Lane'].includes(el.type)) return;
+    if (selected) canvas.removeMarker(selected, 'is-selected');
+    selected = el.id; canvas.addMarker(el.id, 'is-selected'); describe(el);
+  });
+  const showGroup = (key) => {
+    grouped.forEach((id) => canvas.removeMarker(id, 'in-group')); grouped = [];
+    document.querySelectorAll('[data-group]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.group === key)));
+    if (key === 'all') { fit(); return; }
+    const els = GROUPS[key].map((id) => registry.get(id)).filter(Boolean);
+    if (!els.length) return;
+    els.forEach((el) => { canvas.addMarker(el.id, 'in-group'); grouped.push(el.id); });
+    const minX = Math.min(...els.map((e) => e.x)), minY = Math.min(...els.map((e) => e.y));
+    const maxX = Math.max(...els.map((e) => e.x + e.width)), maxY = Math.max(...els.map((e) => e.y + e.height));
+    const pad = 80;
+    canvas.viewbox({ x: minX - pad, y: minY - pad, width: maxX - minX + 2 * pad, height: maxY - minY + 2 * pad });
+  };
+  document.querySelectorAll('[data-group]').forEach((b) => b.addEventListener('click', () => showGroup(b.dataset.group)));
+  document.getElementById('zoom-in').addEventListener('click', () => canvas.zoom(canvas.zoom() * 1.25));
+  document.getElementById('zoom-out').addEventListener('click', () => canvas.zoom(canvas.zoom() / 1.25));
+  window.addEventListener('resize', () => canvas.resized());
+}
+start();
+</script>
+</body>
+</html>
