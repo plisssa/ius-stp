@@ -1,0 +1,33 @@
+{
+  "transport": "JSON-RPC 2.0 / stdio для чтения; локальная транзакция для сохранения предложения",
+  "servers": {
+    "MCP-TICKETS": {
+      "tickets.get": {
+        "input": {
+          "id": "номер текущей заявки"
+        },
+        "access": "чтение в границах организации"
+      },
+      "transport": "stdio · mcp_stdio.py"
+    },
+    "MCP-KB": {
+      "kb.search": {
+        "input": {
+          "topic": "категория"
+        },
+        "access": "чтение утверждённых статей"
+      },
+      "transport": "stdio · mcp_stdio.py"
+    }
+  },
+  "localAdapters": {
+    "proposal.save": {
+      "input": {
+        "source": "ID выданной статьи",
+        "draft": "текст",
+        "confidence": "0..1"
+      },
+      "access": "запись черновика текущей заявки"
+    }
+  }
+}
