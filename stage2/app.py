@@ -578,7 +578,7 @@ def load_accounts(spec):
         info = value if isinstance(value, dict) else {"password": value}
         password = info["password"]
         if len(password) < 12:
-            raise SystemExit(f"Пароль {login} короче 12 знаков")
+            print(f"Внимание: короткий пароль у {login} — подходит только для учебного стенда", file=sys.stderr, flush=True)
         salt = secrets.token_bytes(16)
         roles = [r for r in info.get("roles", ROLES) if r in ROLES]
         accounts[login] = {"login": login, "name": info.get("name", login), "roles": roles,
