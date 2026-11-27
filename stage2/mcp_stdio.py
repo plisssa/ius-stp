@@ -31,13 +31,18 @@ def handle(request):
     return {"content":[{"type":"text","text":json.dumps(row,ensure_ascii=False)}]}
 
 
-for line in sys.stdin:
-    req = json.loads(line)
-    if "id" not in req:
-        continue
-    response = {"jsonrpc":"2.0","id":req["id"]}
-    try:
-        response["result"] = handle(req)
-    except (KeyError,ValueError,TypeError):
-        response["error"] = {"code":-32602,"message":"Запрос отклонён"}
-    print(json.dumps(response),flush=True)
+def serve(input_lines, output):
+    for line in input_lines:
+        req = json.loads(line)
+        if "id" not in req:
+            continue
+        response = {"jsonrpc":"2.0","id":req["id"]}
+        try:
+            response["result"] = handle(req)
+        except (KeyError,ValueError,TypeError):
+            response["error"] = {"code":-32602,"message":"Запрос отклонён"}
+        print(json.dumps(response),file=output,flush=True)
+
+
+if __name__ == "__main__":
+    serve(sys.stdin,sys.stdout)

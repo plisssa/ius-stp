@@ -9,17 +9,20 @@ from urllib.error import HTTPError, URLError
 import os
 import subprocess
 import sys
+import socket
 import sqlite3
 import time
 import uuid
 from contextlib import closing
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone, time as clock
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.request import Request, build_opener, ProxyHandler
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parent
 DATA = json.loads((ROOT / "data.json").read_text())
+SLA = json.loads((ROOT / "sla.json").read_text())  # Справочник C-REF: договоры SLA организаций.
 DB = os.getenv("STP_DB", str(ROOT / "demo.sqlite"))
 MODEL_PORT = int(os.getenv("STP_MODEL_PORT", "11434"))
 MODEL = os.getenv("STP_MODEL", "qwen2.5:0.5b")
@@ -37,6 +40,27 @@ def now():
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
+def deadline(org, priority, registered):
+    """Срок первого ответа по договору организации: календарные или рабочие часы."""
+    contract = SLA[org]
+    left = contract["norms"][priority] * 3600
+    if contract["hours"] == "calendar":
+        return registered + left
+    zone = ZoneInfo(contract["tz"])
+    moment = datetime.fromtimestamp(registered, zone)
+    for _ in range(400):
+        opening = moment.replace(hour=contract["start"], minute=0, second=0, microsecond=0)
+        closing_time = moment.replace(hour=contract["end"], minute=0, second=0, microsecond=0)
+        if moment.weekday() < 5 and moment.date().isoformat() not in SLA["holidays"] and moment < closing_time:
+            moment = max(moment, opening)
+            rest = (closing_time - moment).total_seconds()
+            if left <= rest:
+                return moment.timestamp() + left
+            left -= rest
+        moment = datetime.combine(moment.date() + timedelta(days=1), clock(contract["start"]), zone)
+    raise ValueError("Не удалось рассчитать срок SLA")
+
+
 def init():
     with closing(sqlite3.connect(DB)) as db, db:
         db.executescript("""
@@ -44,9 +68,19 @@ def init():
         CREATE TABLE IF NOT EXISTS proposals(id TEXT PRIMARY KEY,ticket TEXT,draft TEXT,source TEXT,confidence REAL,decision TEXT);
         CREATE TABLE IF NOT EXISTS audit(ticket TEXT,at TEXT,actor TEXT,event TEXT,detail TEXT);
         """)
+        columns = {row[1] for row in db.execute("PRAGMA table_info(tickets)")}
+        for column, kind in (("registered","REAL"),("status","TEXT"),("assignee","TEXT"),("answered","REAL")):
+            if column not in columns:
+                db.execute(f"ALTER TABLE tickets ADD COLUMN {column} {kind}")
+        db.execute("UPDATE tickets SET status=CASE WHEN answer IS NULL THEN 'Waiting for support' ELSE 'Waiting for customer' END WHERE status IS NULL")
         for ticket in DATA["tickets"]:
-            hours = {"P2": 4, "P3": 8, "P4": 24}[ticket["priority"]]
-            db.execute("INSERT OR IGNORE INTO tickets VALUES(?,?,NULL)", (ticket["id"], time.time()+hours*3600))
+            # Загрузка учебной заявки в стенд считается её регистрацией через портал.
+            registered = time.time()
+            due = deadline(ticket["org"], ticket["priority"], registered)
+            added = db.execute("INSERT OR IGNORE INTO tickets(id,deadline,answer,registered,status,assignee) VALUES(?,?,NULL,?,'Waiting for support',NULL)",
+                               (ticket["id"], due, registered)).rowcount
+            if added:
+                audit(db, ticket["id"], "портал", "Регистрация", "Waiting for support · Unassigned · срок "+datetime.fromtimestamp(due, ZoneInfo(SLA[ticket["org"]]["tz"])).strftime("%d.%m %H:%M"))
 
 
 def audit(db, ticket, actor, event, detail):
@@ -77,17 +111,28 @@ def invoke(db, ticket, name, args, action):
 
 
 def read_tool(name,args):
-    script = ROOT / "mcp_stdio.py"
-    command = [sys.executable,"-I","-B",str(script)]
-    if sys.platform != "darwin":
-        raise ValueError("Профиль изоляции стенда требует macOS")
-    command = ["/usr/bin/sandbox-exec","-D","USERDIR="+str(Path.home()),"-D","SCRIPT="+str(script),"-D","DATA="+str(ROOT / "data.json"),"-f",str(ROOT / "read-only.sb"),*command]
     calls = [{"id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"stp","version":"1"}}},
              {"method":"notifications/initialized"},
              {"id":2,"method":"tools/call","params":{"name":name,"arguments":args}}]
     lines = "".join(json.dumps({"jsonrpc":"2.0",**call})+"\n" for call in calls)
-    run = subprocess.run(command,input=lines,text=True,capture_output=True,timeout=4,check=True)
-    rpc = json.loads(run.stdout.splitlines()[-1])
+    endpoint = os.getenv("STP_MCP_SOCKET")
+    if endpoint:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+            client.settimeout(4)
+            client.connect(endpoint)
+            client.sendall(lines.encode())
+            client.shutdown(socket.SHUT_WR)
+            with client.makefile("r", encoding="utf-8") as replies:
+                replies.readline()  # Ответ на initialize.
+                rpc = json.loads(replies.readline())
+    else:
+        script = ROOT / "mcp_stdio.py"
+        command = [sys.executable,"-I","-B",str(script)]
+        if sys.platform != "darwin":
+            raise ValueError("Профиль изоляции стенда требует macOS")
+        command = ["/usr/bin/sandbox-exec","-D","USERDIR="+str(Path.home()),"-D","SCRIPT="+str(script),"-D","DATA="+str(ROOT / "data.json"),"-f",str(ROOT / "read-only.sb"),*command]
+        run = subprocess.run(command,input=lines,text=True,capture_output=True,timeout=4,check=True)
+        rpc = json.loads(run.stdout.splitlines()[-1])
     if "error" in rpc:
         raise ValueError("Инструмент чтения отклонил запрос")
     return json.loads(rpc["result"]["content"][0]["text"])
@@ -153,9 +198,15 @@ def decide(db, ticket, body, actor="Инженер Демо"):
     if action != "Отклонить":
         if not isinstance(answer,str) or not 1 <= len(answer.strip()) <= 2000:
             raise ValueError("Введите ответ длиной до 2000 знаков")
-        db.execute("UPDATE tickets SET answer=? WHERE id=?",(answer,ticket))
+        # Первый ответ: исполнителем становится инженер, статус меняется на ожидание клиента.
+        answered = time.time()
+        db.execute("UPDATE tickets SET answer=?,answered=?,status='Waiting for customer',assignee=COALESCE(assignee,?) WHERE id=?",(answer,answered,actor,ticket))
         db.execute("UPDATE proposals SET decision='Устарело' WHERE ticket=? AND decision IS NULL",(ticket,))
-    audit(db,ticket,actor,action,body.get("proposal","ручной ответ"))
+        due = db.execute("SELECT deadline FROM tickets WHERE id=?",(ticket,)).fetchone()[0]
+        outcome = "SLA соблюдён" if answered <= due else f"SLA нарушен на {math.ceil((answered-due)/60)} мин"
+        audit(db,ticket,actor,action,body.get("proposal","ручной ответ")+" · "+outcome)
+    else:
+        audit(db,ticket,actor,action,body.get("proposal"))
     db.commit()
 
 
@@ -198,7 +249,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/pages-demo.js":
             return self.send(200,(ROOT/"pages-demo.js").read_bytes(),"text/javascript")
         if self.path == "/session":
-            return self.send(200,{"actor":self.actor,"articles":DATA["articles"]})
+            return self.send(200,{"actor":self.actor,"articles":DATA["articles"],"sla":SLA[ORG]})
         if self.path == "/":
             return self.send(200,(ROOT/"index.html").read_bytes(),"text/html")
         if self.path != "/state":
@@ -207,7 +258,7 @@ class Handler(BaseHTTPRequestHandler):
             db.row_factory = sqlite3.Row
             db.execute("BEGIN")
             visible = {t["id"]: {**t,"proposals":[],"log":[]} for t in DATA["tickets"] if t["org"] == ORG}
-            for row in db.execute("SELECT id,deadline,answer FROM tickets"):
+            for row in db.execute("SELECT id,deadline,answer,registered,status,assignee,answered FROM tickets"):
                 if row["id"] in visible:
                     visible[row["id"]].update(dict(row))
             for row in db.execute("SELECT * FROM proposals ORDER BY rowid DESC"):

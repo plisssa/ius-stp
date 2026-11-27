@@ -1,0 +1,13 @@
+*
+!Dockerfile
+!app.py
+!mcp_stdio.py
+!data.json
+!sla.json
+!tools.json
+!index.html
+!pages-demo.js
+!server/
+server/*
+!server/team_app.py
+!server/mcp_service.py

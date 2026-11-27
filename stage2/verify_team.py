@@ -38,6 +38,7 @@ with tempfile.TemporaryDirectory() as directory, ThreadingHTTPServer(("127.0.0.1
     rows = request("engineer2","/state")[1]
     ticket = next(t for t in rows if t["id"]==body["id"])
     assert ticket["answer"] == body["text"] and ticket["log"][0]["actor"]=="engineer1"
+    assert ticket["assignee"] == "engineer1" and ticket["status"] == "Waiting for customer"
     assert request("engineer2","/decision",body)[0]==400
     assert len(rows)==242 and all(t["org"]=="ORG-A" for t in rows)
     server.shutdown()

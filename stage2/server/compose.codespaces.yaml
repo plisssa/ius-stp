@@ -1,0 +1,7 @@
+# Используется вместе с ../compose.yaml, базовый project directory — stage2.
+services:
+  app:
+    ports:
+      - "127.0.0.1:8765:8765"
+    volumes:
+      - ./team-access/state:/state
