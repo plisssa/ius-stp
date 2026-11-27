@@ -1,0 +1,25 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Макет: портал клиента</title><link rel="stylesheet" href="base.css"></head><body>
+<header><b class="brand">СТП</b><strong>Портал клиента</strong><span class="who">А. Петрова · ORG-A</span></header>
+<main style="grid-template-columns:1fr 1.15fr">
+<section class="card"><h2>Новое обращение</h2>
+<label>Тема</label><input value="Не синхронизируются данные проекта">
+<div class="row" style="gap:14px"><div style="flex:1"><label>Инсталляция</label><select><option>Сервер ORG-A · версия 5.2</option></select></div>
+<div style="flex:1"><label>Приоритет</label><select><option>P2 · 4 рабочих часа</option></select></div></div>
+<label>Описание</label><textarea>С утра после обновления клиента изменения из приложения не попадают на сервер. Ошибок на экране нет.</textarea>
+<label>Вложения</label><input value="sync-log.txt">
+<div class="row spread" style="margin-top:16px"><span class="muted">Номер, статус и срок ответа появятся после отправки</span><button class="primary">Send</button></div>
+<div class="hint">Новая заявка получает номер ES-XXXX, статус «Waiting for support» и исполнителя «Unassigned». Срок первого ответа считается по договору SLA вашей организации.</div>
+</section>
+<section class="card"><div class="row spread"><h2>Мои обращения</h2><span class="muted">Только заявки ORG-A</span></div>
+<ul class="list">
+<li><div class="row spread"><b>ES-9181 · Ошибка входа в портал</b><span class="pill good">Waiting for customer</span></div>
+<p class="muted">Инженер И. Смирнов, сегодня 10:42: «Уточните, пожалуйста, время ошибки, часовой пояс и текст сообщения на экране».</p>
+<div class="row"><button class="primary">Ответить</button></div></li>
+<li><div class="row spread"><b>ES-9176 · Пустой файл отчёта</b><span class="pill">Waiting for support</span></div>
+<p class="muted">Исполнитель: Unassigned · первый ответ до 15:00</p></li>
+<li><div class="row spread"><b>ES-9160 · Медленная загрузка панели</b><span class="pill good">Waiting for customer</span></div>
+<p class="muted">Инженер предложил решение. Оно помогло?</p>
+<div class="row"><button class="primary">Помогло, закрыть</button><button>Не помогло</button></div></li>
+<li><div class="row spread"><b>ES-9142 · Обновление до версии 5.2</b><span class="pill">Closed</span></div>
+<p class="muted">Закрыта 18.11 · возобновить можно до 02.12</p><div class="row"><button>Возобновить</button></div></li>
+</ul></section></main></body></html>

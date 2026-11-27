@@ -1,0 +1,57 @@
+name: ius-stp
+services:
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      STP_DOMAIN: ${STP_DOMAIN:?set the public hostname}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./server/Caddyfile:/etc/caddy/Caddyfile:ro
+      - certificates:/data
+      - proxy_config:/config
+  app:
+    build: .
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      STP_BIND: 0.0.0.0
+      STP_ORIGIN: https://${STP_DOMAIN}
+      STP_MCP_SOCKET: /ipc/tools.sock
+      STP_DB: /state/team.sqlite
+    volumes:
+      - state:/state
+      - ipc:/ipc:ro
+      - ./team-access/elizaveta.txt:/run/secrets/elizaveta.txt:ro
+      - ./team-access/maria.txt:/run/secrets/maria.txt:ro
+      - ./team-access/vlad.txt:/run/secrets/vlad.txt:ro
+  tools:
+    build: .
+    command: ["python", "server/mcp_service.py"]
+    network_mode: none
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    environment:
+      STP_MCP_SOCKET: /ipc/tools.sock
+    volumes:
+      - ipc:/ipc
+  ollama:
+    image: ollama/ollama:latest
+    network_mode: service:app
+    restart: unless-stopped
+    environment:
+      OLLAMA_HOST: 127.0.0.1:11434
+    volumes:
+      - weights:/root/.ollama
+volumes:
+  state:
+  weights:
+  ipc:
+  certificates:
+  proxy_config:
