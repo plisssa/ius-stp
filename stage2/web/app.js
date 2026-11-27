@@ -27,7 +27,8 @@ async function api(path, body) {
   const r = await fetch(path, body === undefined ? {cache: 'no-store'} :
     {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
   const data = await r.json().catch(() => ({}));
-  if (r.status === 401 && path !== '/api/login') { S = null; route(); throw Error('Нужен вход'); }
+  // Сессия истекла во время работы — показать вход один раз, без повторного запроса сессии.
+  if (r.status === 401 && path !== '/api/login' && path !== '/api/session') { S = null; clearInterval(timer); loginView(); throw Error('Нужен вход'); }
   if (!r.ok) throw Error(data.message || 'Запрос не выполнен');
   return data;
 }
