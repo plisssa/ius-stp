@@ -4,9 +4,9 @@ set -eu
 : "${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:?Missing forwarding domain}"
 cd "$(dirname "$0")/.."
 export STP_DOMAIN="${CODESPACE_NAME}-8765.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
-python3 -c 'from share import credentials; credentials()'
-sudo chgrp 10001 team-access/{elizaveta,maria,vlad}.txt
-chmod 640 team-access/{elizaveta,maria,vlad}.txt
+python3 server/make_users.py >/dev/null
+sudo chgrp 10001 team-access/users.json
+chmod 640 team-access/users.json
 sudo install -d -o 10001 -g 10001 -m 700 team-access/state
 compose=(docker compose -f compose.yaml -f server/compose.codespaces.yaml)
 "${compose[@]}" up -d --build app tools ollama

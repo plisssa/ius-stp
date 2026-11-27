@@ -3,4 +3,4 @@
 (deny network*)
 (deny file-write*)
 (deny file-read-data (subpath (param "USERDIR")))
-(allow file-read-data (literal (param "SCRIPT")) (literal (param "DATA")))
+(allow file-read-data (literal (param "SCRIPT")) (literal (param "DATA")) (literal (param "DB")) (literal (string-append (param "DB") "-journal")))

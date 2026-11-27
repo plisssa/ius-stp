@@ -14,7 +14,7 @@ parser.add_argument("--port",type=int,default=8767)
 args = parser.parse_args()
 if not any(args.address in ipaddress.ip_network(n) for n in ("10.0.0.0/8","172.16.0.0/12","192.168.0.0/16")):
     parser.error("Укажите частный IPv4-адрес сетевого интерфейса")
-app.ACCOUNTS = credentials()
+app.ACCOUNTS = app.load_accounts(credentials())
 folder = app.ROOT / "team-access"
 certificate = folder / f"stp-{args.address}.crt"
 key = folder / f"stp-{args.address}.key"
