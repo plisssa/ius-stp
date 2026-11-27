@@ -1,14 +1,14 @@
 {
-  "transport": "JSON-RPC 2.0 / stdio для чтения; локальная транзакция для сохранения предложения",
+  "transport": "JSON-RPC 2.0: stdio (локально) или Unix-сокет (общий сервер); сохранение предложения — локальная транзакция",
   "servers": {
     "MCP-TICKETS": {
       "tickets.get": {
         "input": {
           "id": "номер текущей заявки"
         },
-        "access": "чтение в границах организации"
+        "access": "чтение текущей заявки из базы только на чтение, без данных автора"
       },
-      "transport": "stdio · mcp_stdio.py"
+      "transport": "stdio или Unix-сокет · mcp_stdio.py"
     },
     "MCP-KB": {
       "kb.search": {
@@ -17,7 +17,7 @@
         },
         "access": "чтение утверждённых статей"
       },
-      "transport": "stdio · mcp_stdio.py"
+      "transport": "stdio или Unix-сокет · mcp_stdio.py"
     }
   },
   "localAdapters": {

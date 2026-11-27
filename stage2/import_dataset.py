@@ -19,6 +19,8 @@ topics = [
 for number,(topic,_,question) in enumerate(topics,3):
     articles.append({"id":f"KB-{number:02}","topic":topic,"text":"Первичная диагностика. "+question,"question":question})
 translated = {t["row"]: t for t in data["tickets"] if "source_hash" in t}
+# Типы набора данных → справочник типов кейса (ASM-11); тип считается указанным клиентом.
+types = {"Incident": "Ошибка", "Problem": "Ошибка", "Request": "Вопрос по функционалу", "Change": "Вопрос по конфигурации"}
 counts = dict.fromkeys([t[0] for t in topics], 0)
 seen = set()
 for row,r in enumerate(csv.DictReader(open(sys.argv[1],encoding="utf-8-sig")),2):
@@ -37,7 +39,7 @@ for row,r in enumerate(csv.DictReader(open(sys.argv[1],encoding="utf-8-sig")),2)
     ru = translated.get(row)
     if ru is None or ru["source_hash"] != digest:
         raise ValueError(f"Для изменённой исходной строки {row} требуется перевод")
-    tickets.append({"id":f"ES-{6000+sum(counts.values())}","org":"ORG-A","topic":topic,"priority":{"high":"P2","medium":"P3","low":"P4"}[r["priority"]],"title":ru["title"],"body":ru["body"],"row":row,"source_hash":digest})
+    tickets.append({"id":f"ES-{6000+sum(counts.values())}","org":"ORG-A","topic":topic,"priority":{"high":"P2","medium":"P3","low":"P4"}[r["priority"]],"title":ru["title"],"body":ru["body"],"row":row,"source_hash":digest,"type":types[r["type"]]})
 if sum(counts.values())<200:
     raise ValueError(counts)
 data.update(tickets=tickets,articles=articles)

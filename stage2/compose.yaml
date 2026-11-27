@@ -23,12 +23,11 @@ services:
       STP_ORIGIN: https://${STP_DOMAIN}
       STP_MCP_SOCKET: /ipc/tools.sock
       STP_DB: /state/team.sqlite
+      STP_USERS_FILE: /run/secrets/users.json
     volumes:
       - state:/state
       - ipc:/ipc:ro
-      - ./team-access/elizaveta.txt:/run/secrets/elizaveta.txt:ro
-      - ./team-access/maria.txt:/run/secrets/maria.txt:ro
-      - ./team-access/vlad.txt:/run/secrets/vlad.txt:ro
+      - ./team-access/users.json:/run/secrets/users.json:ro
   tools:
     build: .
     command: ["python", "server/mcp_service.py"]
@@ -39,8 +38,10 @@ services:
     security_opt: [no-new-privileges:true]
     environment:
       STP_MCP_SOCKET: /ipc/tools.sock
+      STP_DB: /state/team.sqlite
     volumes:
       - ipc:/ipc
+      - state:/state:ro
   ollama:
     image: ollama/ollama:latest
     network_mode: service:app

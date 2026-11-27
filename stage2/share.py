@@ -54,7 +54,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--provider",choices=("cloudflare","localhost.run"),default="cloudflare")
     provider = parser.parse_args().provider
-    app.ACCOUNTS = credentials()
+    app.ACCOUNTS = app.load_accounts(credentials())
     app.init()
     with ThreadingHTTPServer(("127.0.0.1",0),app.Handler) as server:
         if provider == "cloudflare":
