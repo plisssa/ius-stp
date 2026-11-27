@@ -1,7 +1,13 @@
 # Используется вместе с ../compose.yaml, базовый project directory — stage2.
+# Без Caddy: HTTPS даёт GitHub, база — в постоянном рабочем каталоге Codespace.
 services:
   app:
     ports:
       - "127.0.0.1:8765:8765"
+    environment:
+      STP_ALLOWED_HOSTS: localhost:8765,127.0.0.1:8765
     volumes:
       - ./team-access/state:/state
+  tools:
+    volumes:
+      - ./team-access/state:/state:ro

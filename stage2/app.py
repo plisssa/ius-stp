@@ -601,15 +601,20 @@ def public(user):
 STATIC = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"), "/app.css": ("app.css", "text/css")}
 
 
+def extra_hosts():
+    # STP_ALLOWED_HOSTS: дополнительные адреса, например проброшенный порт localhost:8765 в Codespaces.
+    return [h.strip() for h in os.getenv("STP_ALLOWED_HOSTS", "").split(",") if h.strip()]
+
+
 def allowed_hosts():
-    hosts = {urlsplit(ORIGIN).netloc}
+    hosts = {urlsplit(ORIGIN).netloc, *extra_hosts()}
     if os.getenv("SPACE_HOST"):
         hosts.add(os.getenv("SPACE_HOST"))
     return hosts
 
 
 def allowed_origins():
-    origins = {ORIGIN}
+    origins = {ORIGIN, *("http://" + h for h in extra_hosts())}
     if os.getenv("SPACE_HOST"):
         origins.add("https://" + os.getenv("SPACE_HOST"))
     return origins
@@ -647,7 +652,10 @@ class Handler(BaseHTTPRequestHandler):
         return None
 
     def host_ok(self):
-        if self.headers.get("Host") not in allowed_hosts():
+        # За прокси (Codespaces, Caddy) публичный адрес может прийти в X-Forwarded-Host.
+        hosts = allowed_hosts()
+        forwarded = (self.headers.get("X-Forwarded-Host") or "").split(",")[0].strip()
+        if self.headers.get("Host") not in hosts and forwarded not in hosts:
             self.send(403, {"message": "Неизвестный адрес"})
             return False
         return True

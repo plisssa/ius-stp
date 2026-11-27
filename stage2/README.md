@@ -25,22 +25,19 @@
 
 ## Где работает
 
-**Общий сервис для всех — Hugging Face Spaces.** Один Docker-контейнер: приложение, сервер инструментов и модель. Развёртывание:
+**Общий сервис для всех — GitHub Codespaces.** Владелец репозитория запускает сервис перед показом; все открывают один HTTPS-адрес и входят по личным логинам. Бесплатная квота GitHub — 120 ядро-часов в месяц, то есть до 60 часов работы на машине с двумя ядрами.
 
-1. Зарегистрируйтесь на huggingface.co и создайте Space: имя `ius-stp`, SDK — Docker, шаблон Blank, оборудование — бесплатное CPU basic.
-2. Создайте личные учётные записи команды и преподавателей:
+1. Отправьте код на GitHub (`git push`). На странице репозитория: **Code → Codespaces → Create codespace on main**.
+2. В терминале Codespace выполните:
    ```sh
-   python3 stage2/server/make_users.py
+   bash stage2/server/start_codespace.sh
    ```
-   Скрипт сохранит логины и пароли в `stage2/team-access/users.json` (папка исключена из Git) и напечатает строку для секрета. В Space откройте Settings → Variables and secrets → New secret, имя `STP_USERS`, значение — эта строка.
-3. В настройках профиля Hugging Face создайте токен доступа с правом записи (Access Tokens → Write).
-4. Отправьте сервис в Space; git спросит логин Hugging Face и токен:
-   ```sh
-   bash stage2/space/push.sh ВАШ_ЛОГИН/ius-stp
-   ```
-5. Сборка занимает около 10 минут. Сервис открывается по адресу `https://ВАШ_ЛОГИН-ius-stp.hf.space`.
+   Первый запуск занимает 5–10 минут: собираются контейнеры и скачивается модель. Скрипт выведет логины и пароли команды и преподавателей (файл `stage2/team-access/users.json`, исключён из Git) и адрес сервиса `https://ИМЯ-CODESPACE-8765.app.github.dev`.
+3. Сделайте порт публичным, если скрипт не сделал этого сам: вкладка **PORTS** → строка 8765 → правый клик → **Port Visibility → Public**.
+4. Отправьте участникам адрес и каждому — только его логин и пароль.
+5. После показа остановите Codespace (**Codespaces → Stop codespace**); база сохраняется в `stage2/team-access/state` и будет на месте при следующем запуске той же командой.
 
-На бесплатном тарифе Space засыпает после 48 часов без посещений и просыпается при первом заходе за 1–2 минуты; при перезапуске база возвращается к учебным заявкам. Если подключить постоянное хранилище, база сохраняется в `/data`.
+Codespace останавливается сам после простоя (по умолчанию 30 минут без работы в редакторе); перед защитой увеличьте время в github.com/settings/codespaces → Default idle timeout. Остановленный Codespace по ссылке не запускается — его запускает владелец.
 
 **Локально на Mac.** Запустите приложение Ollama, затем из корня проекта:
 
@@ -52,6 +49,8 @@ python3 stage2/app.py
 Откройте **http://127.0.0.1:8765**. Без файла учётных записей открывается сессия «Инженер Демо» со всеми ролями. Переменные STP_PORT и STP_DB задают порт и файл базы. Сервер инструментов запускается в песочнице macOS без сети и записи.
 
 **Свой сервер.** Docker Compose с HTTPS-прокси и сервером инструментов в отдельном контейнере без сети — [server/README.md](server/README.md).
+
+**Hugging Face Spaces.** Пакет `space/` (Docker-образ с приложением, сервером инструментов и моделью, секрет `STP_USERS`, отправка `bash stage2/space/push.sh ЛОГИН/ius-stp`) рассчитан на Docker Space. С 2026 года Docker и CPU Basic на Hugging Face доступны только с платным планом PRO, поэтому для бесплатного показа используется Codespaces.
 
 ## Показ на защите
 
@@ -78,8 +77,8 @@ python3 stage2/server/verify_shared.py
 | classifier.py, ml/ | Классификатор А1–А2: применение, обучение, перевод, веса и метрики |
 | tools.json, mcp_stdio.py, read-only.sb | Манифест инструментов, MCP-сервер чтения (база только на чтение, без данных автора) и профиль песочницы macOS |
 | data.json, sla.json | 243 учебные заявки и 6 статей ([DATASET.md](DATASET.md)); договоры SLA, нормативы и нерабочие дни |
-| space/ | Hugging Face Spaces: Dockerfile, запуск, описание, отправка |
-| Dockerfile, compose.yaml, server/ | Свой сервер: HTTPS-прокси, приложение, сервер инструментов без сети, модель; учётные записи |
+| space/ | Hugging Face Spaces (нужен план PRO): Dockerfile, запуск, описание, отправка |
+| Dockerfile, compose.yaml, server/, ../.devcontainer/ | Общий сервер: Codespaces или своя VM — приложение, сервер инструментов без сети, модель; учётные записи |
 | verify.py, verify_team.py, server/verify_shared.py | Автоматические проверки |
 | architecture.png, entities.png, deployment.png, harness.png, trust.png, workplace.png, decision.png, mockups/ | Схемы, снимки экрана и макеты отчёта |
 | journal.md | Журнал реализации с точками проверки |

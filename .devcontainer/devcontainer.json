@@ -1,0 +1,9 @@
+{
+  "name": "ИУС СТП",
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
+  "hostRequirements": { "cpus": 2, "memory": "8gb" },
+  "forwardPorts": [8765],
+  "portsAttributes": {
+    "8765": { "label": "Сервис СТП", "onAutoForward": "notify" }
+  }
+}
