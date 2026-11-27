@@ -16,6 +16,7 @@ for attempt in {1..60}; do
     sleep 2
 done
 "${compose[@]}" exec -T ollama ollama pull qwen2.5:0.5b
+"${compose[@]}" restart app >/dev/null  # перечитать учётные записи
 for attempt in {1..60}; do
     if curl -s -o /dev/null -H "Host: $STP_DOMAIN" http://127.0.0.1:8765/; then break; fi
     sleep 2
