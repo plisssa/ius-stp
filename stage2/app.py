@@ -661,7 +661,12 @@ class Handler(BaseHTTPRequestHandler):
         return True
 
     def body(self):
-        if self.headers.get("Origin") not in allowed_origins() or self.headers.get_content_type() != "application/json":
+        # Защита от запросов с чужих сайтов: Origin своего адреса или Sec-Fetch-Site: same-origin.
+        # Второе нужно за прокси Codespaces, который подменяет Origin; чужой сайт этот заголовок подделать не может.
+        origin = self.headers.get("Origin")
+        same_site = self.headers.get("Sec-Fetch-Site") == "same-origin"
+        if (origin not in allowed_origins() and not same_site) or self.headers.get_content_type() != "application/json":
+            print(f"Запрос отклонён: Origin={origin!r}, Sec-Fetch-Site={self.headers.get('Sec-Fetch-Site')!r}, Host={self.headers.get('Host')!r}", file=sys.stderr, flush=True)
             raise PermissionError
         size = int(self.headers.get("Content-Length", "0"))
         if not 0 < size <= 16000:
