@@ -157,8 +157,11 @@ function loginView() {
   const pass = h('input', {id: 'password', type: 'password', autocomplete: 'current-password', required: true});
   const form = h('form', {class: 'card', onsubmit: async e => {
     e.preventDefault(); err.textContent = '';
-    try { await api('/api/login', {login: login.value.trim(), password: pass.value}); S = null; pass.value = ''; await route(); }
-    catch (x) { err.textContent = x.message; }
+    try { await api('/api/login', {login: login.value.trim(), password: pass.value.trim()}); }
+    catch (x) { err.textContent = x.message; return; }
+    try { S = await api('/api/session'); }
+    catch { S = null; err.textContent = 'Пароль принят, но браузер не сохранил вход (cookie). Откройте сервис по прямой ссылке в обычной вкладке и разрешите cookie для этого сайта.'; return; }
+    pass.value = ''; await route();
   }},
     h('h1', {}, 'Вход'),
     h('p', {class: 'muted'}, 'Учебный сервис обработки обращений в службу технической поддержки (вариант 12).'),
