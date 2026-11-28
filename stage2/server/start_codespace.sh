@@ -17,12 +17,22 @@ for attempt in {1..60}; do
 done
 "${compose[@]}" exec -T ollama ollama pull qwen2.5:0.5b
 "${compose[@]}" restart app >/dev/null  # перечитать учётные записи
+code=000
 for attempt in {1..60}; do
-    if curl -s -o /dev/null -H "Host: $STP_DOMAIN" http://127.0.0.1:8765/; then break; fi
+    code=$(curl -s -o /dev/null -w "%{http_code}" -H "Host: $STP_DOMAIN" http://127.0.0.1:8765/ || true)
+    [ "$code" = "200" ] && break
     sleep 2
 done
+if [ "$code" != "200" ]; then
+    echo "Сервис не отвечает на 127.0.0.1:8765 (код $code). Состояние контейнеров и журнал приложения:"
+    "${compose[@]}" ps
+    "${compose[@]}" logs --tail 40 app tools
+    exit 1
+fi
+echo "Сервис отвечает внутри Codespace."
 if ! gh codespace ports visibility 8765:public -c "$CODESPACE_NAME" >/dev/null 2>&1; then
-    echo "Сделайте порт публичным вручную: панель PORTS → строка 8765 → правый клик → Port Visibility → Public"
+    echo "Откройте вкладку PORTS рядом с терминалом. Если строки 8765 нет — Add Port → 8765."
+    echo "Затем правый клик по строке 8765 → Port Visibility → Public."
 fi
 printf '\nСервис: https://%s\n' "$STP_DOMAIN"
 echo "Остановка после показа: Codespaces → Stop codespace (данные сохраняются в team-access/state)."
