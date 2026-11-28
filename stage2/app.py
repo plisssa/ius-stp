@@ -695,7 +695,13 @@ class Handler(BaseHTTPRequestHandler):
                         rows = db.execute("SELECT * FROM tickets ORDER BY CASE status WHEN ? THEN 0 WHEN ? THEN 1 ELSE 2 END, deadline", (WAIT_SUPPORT, WAIT_CUSTOMER))
                     else:
                         return self.send(403, {"message": "Нет доступа"})
-                    return self.send(200, [summary(r) for r in rows])
+                    pending = {}
+                    if engineer and query.get("view") != "client":
+                        # А4 — черновик ждёт решения; А1 — только если тип ИИ расходится с указанным клиентом.
+                        for tid_, kind in db.execute("SELECT p.ticket, p.kind FROM proposals p JOIN tickets t ON t.id=p.ticket WHERE p.decision IS NULL"
+                                                     " AND (p.kind='A4' OR (p.kind='A1' AND (t.type IS NULL OR t.type!=p.draft)))"):
+                            pending.setdefault(tid_, []).append(kind)
+                    return self.send(200, [{**summary(r), "ai": sorted(pending.get(r["id"], []))} for r in rows])
                 if url.path.startswith("/api/tickets/"):
                     tid = url.path.rsplit("/", 1)[1]
                     as_engineer = engineer and query.get("view") != "client"
